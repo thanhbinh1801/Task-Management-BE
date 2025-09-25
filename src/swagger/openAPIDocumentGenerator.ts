@@ -1,38 +1,20 @@
-import {
-  OpenApiGeneratorV3,
-  OpenAPIRegistry,
-} from "@asteasolutions/zod-to-openapi";
-
-import {
-  SWAGGER_API_DESCRIPTION,
-  SWAGGER_API_PATH,
-  SWAGGER_API_TITLE,
-  SWAGGER_API_VERSION,
-} from "./constants";
-import { Registries } from "../modules";
+import { healthCheckRegistry } from "@/modules/healthCheck/healthCheck.router";
+import { authRegistry } from "@/modules/auth/auth.route";
+import { OpenApiGeneratorV3, OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 
 export function generateOpenAPIDocument() {
-  const registry = new OpenAPIRegistry([...Registries]);
+    const registry = new OpenAPIRegistry([authRegistry, healthCheckRegistry])
+    const generator = new OpenApiGeneratorV3(registry.definitions)
 
-  registry.registerComponent("securitySchemes", "bearerAuth", {
-    type: "http",
-    scheme: "bearer",
-    bearerFormat: "JWT",
-    name: "Authorization",
-    in: "header",
-  });
-
-  const generator = new OpenApiGeneratorV3(registry.definitions);
-
-  return generator.generateDocument({
-    openapi: "3.0.0",
-    info: {
-      version: SWAGGER_API_VERSION,
-      title: SWAGGER_API_TITLE,
-    },
-    externalDocs: {
-      description: SWAGGER_API_DESCRIPTION,
-      url: SWAGGER_API_PATH,
-    },
-  });
+    return generator.generateDocument({
+        openapi: '3.0.0',
+        info: {
+            version: '1.0.0',
+            title: 'Swagger API',
+        },
+        externalDocs: {
+            description: 'View the raw OpenAPI Specification in JSON format',
+            url: '/swagger.json',
+        },
+    })
 }
