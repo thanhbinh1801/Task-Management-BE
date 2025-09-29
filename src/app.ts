@@ -12,6 +12,7 @@ import mainRouter from "./commons/router/index.router";
 import passport from "passport";
 import session from "express-session";
 import { healthCheckRouter } from "./modules/healthCheck/healthCheck.router";
+import cookieParser from "cookie-parser";
 
 const app: Express = express();
 
@@ -24,6 +25,7 @@ app.set("trust proxy", true);
 app.use(cors({ origin: appEnv.CORS_ORIGIN, credentials: true }));
 app.use(helmet());
 app.use(morgan("combined"));
+app.use(cookieParser());
 
 app.use(
   session({

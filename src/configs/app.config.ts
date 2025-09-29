@@ -15,4 +15,9 @@ export const appEnv = cleanEnv(process.env, {
   GOOGLE_CLIENT_ID: str({ default: '' }),
   GOOGLE_CLIENT_SECRET: str({ default: '' }),
   GOOGLE_CALLBACK_URL: str({ default: 'http://localhost:8000/api/v1/auth/google/callback' }),
+  // Send Mail
+  SMTP_HOST: str(),
+  SMTP_PORT: num(),
+  SMTP_USER: str(),
+  SMTP_PASS: str(),
 });

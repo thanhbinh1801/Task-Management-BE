@@ -13,7 +13,11 @@ export function buildOpenAPIRouter(): Router {
         res.send(openAPIDocument);
     });
 
-    router.use('/', swaggerUi.serve, swaggerUi.setup(openAPIDocument));
+    router.use('/', swaggerUi.serve, swaggerUi.setup(openAPIDocument, {
+        swaggerOptions: {
+            persistAuthorization: true
+        }
+    }));
 
     return router;
 }

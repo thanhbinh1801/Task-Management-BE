@@ -17,13 +17,3 @@ export const RegisterSchema = z.object({
     avatarUrl: z.string().url().nullable().openapi({ example: 'https://example.com/avatar.jpg' }).optional(),
 });
 
-export type UserResponseDTO = z.infer<typeof UserResponseDTOSchema>;
-export const UserResponseDTOSchema = z.object({
-    id: z.string().uuid().openapi({ example: '550e8400-e29b-41d4-a716-446655440000' }),
-    email: z.string().email().openapi({ example: 'thanhbinh1801@gmail.com' }),
-    name: z.string().nullable().openapi({ example: 'John Doe' }),
-    avatarUrl: z.string().url().nullable().openapi({ example: 'https://example.com/avatar.jpg' }),
-    isActive: z.number().openapi({ example: 1 }),
-    createdAt: z.string().openapi({ example: '2023-10-01T12:00:00Z' }),
-    updatedAt: z.string().openapi({ example: '2023-10-01T12:00:00Z' }),
-});

@@ -17,12 +17,53 @@ model User {
   id String @id @default(cuid())
   email String @unique
   name String?
-  passwordHash String?
-  isActive Int
+  isActive Int?
   avatarUrl String?
-  // OAuth provider linkage
-  provider   String?
-  providerId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  emailVerifiedAt    DateTime?  
+
+  //Relations
+  account Account?
+  tokens Token[]
+  otps Otp[]
+  socialAccounts  SocialAccounts[]
+
+}
+
+model Account {
+  id  String @id @default(cuid())
+  userId String @unique
+  passwordHash String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Token {
+  id String @id @default(cuid())
+  userId String @unique
+  refreshToken String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade )
+}
+
+model SocialAccounts{
+  id String @id @default(cuid())
+  userId String 
+  provider   String
+  providerId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade )
+
+  @@unique([provider, providerId]) // 1 providerId duy nhất
+}
+
+model Otp {
+  id String @id @default(cuid())
+  userId String
+  otp String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade )
 }
