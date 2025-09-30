@@ -1,7 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 import AuthController from "./auth.controller";
 import { guard } from "@/commons/middlewares/guard.middleware";
-import passport from "./google.strategy";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { LoginSchema, RegisterSchema } from "@/commons";
 import { createApiResponse } from "@/swagger";
@@ -169,15 +168,11 @@ export function makeAuthRouter(controller: AuthController) {
   router.get('/logout', controller.logout);
   
   //Oauth2
-  router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+  router.get('/google', controller.googleAuth);
 
-  router.get(
-    '/google/callback',
-    passport.authenticate('google', { failureRedirect: '/api/v1/auth/login-failed' }),
-    (_req: Request, res: Response) => {
-      res.redirect('/api/v1/auth/profile');
-    }
-  );
+  router.get('/google/callback', controller.googleAuthCallback);
+
+  router.get('/login-failed', controller.authFailure);
 
   router.get('/profile', (req: Request, res: Response) => {
     res.json({ user: (req as any).user });

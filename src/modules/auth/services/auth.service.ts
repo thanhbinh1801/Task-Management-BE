@@ -1,13 +1,15 @@
-import { LoginResponse, RegisterResponse} from "../../commons/dtos/auth.schema";
-import prisma from '../../configs/prisma';
+import { LoginResponse, RegisterResponse} from "@/commons/dtos/auth.schema";
+import prisma from '../../../configs/prisma';
 import JwtUtils from "@/commons/utils/jwt.util";
 import HashUtil from "@/commons/utils/hash.util";
-import { NotFoundException, UnauthorizedException, ConflictException} from '../../commons'
+import { NotFoundException, UnauthorizedException, ConflictException} from '@/commons'
 import { AppJwtPayload } from "@/commons/dtos/jwtPayload.schema";
 import { sendMail } from "@/commons/utils/mail.util";
-import { IAccountRepository, ISocialAccountRepository, IOtpRepository, ITokenRepository } from "../auth/repository/interfaces";
+import { IAccountRepository, ISocialAccountRepository, IOtpRepository, ITokenRepository } from "../../auth/repository/interfaces";
 import { IUserRepository } from "@/modules/user/repository/interface/IUserRepository";
 import { InternalServerException } from "@/commons/exceptions";
+import { GoogleAuthData } from "../services/interfaces/IGoogleAuthData";
+import { create } from "domain";
 
 export default  class AuthService {
   constructor(
@@ -101,7 +103,6 @@ export default  class AuthService {
     if (!createOtp) {
       throw new InternalServerException("Could not create OTP");
     }
-    // Gửi email cho user
     await sendMail(
       user.email,
       "Password Reset OTP.",
@@ -174,5 +175,37 @@ export default  class AuthService {
   async logout(refreshToken: string): Promise<void> {
     await this.tokenRepo.deleteRefreshToken(refreshToken);
     return;
+  }
+
+  async processGoogleLogin(googleAuthData: GoogleAuthData){
+    const { accessToken, refreshToken, profile, user } = googleAuthData;
+    if(!user.email){
+      throw new UnauthorizedException("Google account has no email");
+    }
+    const existingUser = await this.userRepo.findByEmail(user.email);
+    if(!existingUser){
+      const createdUser = await this.userRepo.createUser({
+        email: user.email,
+        name: user.name ?? null,
+        isActive: 1,
+        avatarUrl: user.avatar ?? null,
+        socialAccounts: {
+          create: {
+            provider: 'google',
+            providerId: profile.id,
+          }
+        },
+        tokens: {
+          create: {
+            refreshToken: refreshToken,
+            expiresAt: new Date(Date.now() + 7*24*60*60*1000) // 7 days
+          }
+        }
+      });
+      if(!createdUser){
+        throw new InternalServerException("Could not create user");
+      }
+      return { user: createdUser, accessToken, refreshToken  };
+    }
   }
 }

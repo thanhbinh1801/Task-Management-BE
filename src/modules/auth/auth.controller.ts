@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import AuthService from "./auth.service";
+import AuthService from "./services/auth.service";
+import passport from "passport";
 
 export default class AuthController {
   constructor(private readonly authService: AuthService ) {}
@@ -96,4 +97,45 @@ export default class AuthController {
       next(exception);
     }
   }
+
+  // OAuth2 with Google
+  googleAuth = (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate('google', { 
+      scope: ['profile', 'email'] ,
+      accessType: 'offline',
+      prompt: 'consent'
+    })(req, res, next);
+  }
+
+  googleAuthCallback = (req: Request, res: Response, next: NextFunction) => {
+    passport.authenticate('google', {
+      failureRedirect: '/api/v1/auth/login-failed',
+      session: false
+    }, async (err, user: any) => {
+      if (err) return next(err);
+      if(!user) return res.redirect('/api/v1/auth/login-failed');
+      try{
+        const result = await this.authService.processGoogleLogin(user);
+        res.cookie("refreshToken", result?.refreshToken, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
+        return res.status(200).json({ message: "Login successful", data: result });
+      }
+      catch(ex){
+        return next(ex);
+      }
+    })(req, res, next);
+  }
+
+  authFailure = (req: Request, res: Response) => {
+      return res.status(401).json({
+          success: false,
+          message: 'Authentication failed',
+          data: null,
+          code: 401
+      });
+  };
 }
