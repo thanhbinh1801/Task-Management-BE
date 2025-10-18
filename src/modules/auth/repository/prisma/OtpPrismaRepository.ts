@@ -1,6 +1,5 @@
 import { prisma } from "@/configs/prisma"
 import { IOtpRepository } from "../interfaces/IOtpRepository"
-import { Otp } from "@prisma/client"
 import bcrypt from "bcryptjs"
 
 export class OtpPrismaRepository implements IOtpRepository {

@@ -1,10 +1,11 @@
-import { Router, Request, Response, NextFunction } from "express";
+import { Router, Request, Response } from "express";
 import AuthController from "./auth.controller";
-import { guard } from "@/commons/middlewares/guard.middleware";
+import { authenticate } from "@/commons/middlewares/authenticate";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { LoginSchema, RegisterSchema } from "@/commons";
 import { createApiResponse } from "@/swagger";
 import { z } from "zod";
+import { asyncHandler } from "@/commons/middlewares/async.handler";
 
 export const authRegistry = new OpenAPIRegistry();
 
@@ -149,34 +150,34 @@ authRegistry.registerPath({
   responses: createApiResponse(z.null(), 'Success'),
 });
 
-export function makeAuthRouter(controller: AuthController) {
-  const router = Router();
+export function AuthRouter(authController: AuthController): Router {
+  const authRouter = Router();
 
-  router.post("/login", controller.login);
-  router.post("/register", controller.register);
+  authRouter.post("/login", asyncHandler(authController.login));
+  authRouter.post("/register", asyncHandler(authController.register));
 
-  router.post('/refresh-token', controller.refreshToken);
+  authRouter.post('/refresh-token', asyncHandler(authController.refreshToken));
 
-  router.post('/forgot-password', controller.forgotPassword);
+  authRouter.post('/forgot-password', asyncHandler(authController.forgotPassword));
 
-  router.post('/verify-email', controller.verifyEmail);
+  authRouter.post('/verify-email', asyncHandler(authController.verifyEmail));
 
-  router.post('/reset-password',controller.resetPassword);
+  authRouter.post('/reset-password', asyncHandler(authController.resetPassword));
 
-  router.post('/change-password',guard(), controller.changePassword);
+  authRouter.post('/change-password', asyncHandler(authenticate()), asyncHandler(authController.changePassword));
 
-  router.get('/logout', controller.logout);
+  authRouter.get('/logout', asyncHandler(authController.logout));
   
   //Oauth2
-  router.get('/google', controller.googleAuth);
+  authRouter.get('/google', asyncHandler(authController.googleAuth));
 
-  router.get('/google/callback', controller.googleAuthCallback);
+  authRouter.get('/google/callback', asyncHandler(authController.googleAuthCallback));
 
-  router.get('/login-failed', controller.authFailure);
+  authRouter.get('/login-failed', asyncHandler(authController.authFailure));
 
-  router.get('/profile', (req: Request, res: Response) => {
-    res.json({ user: (req as any).user });
+  authRouter.get('/profile', (req: Request, res: Response) => {
+    res.json({ user: req.user });
   });
 
-  return router;
+  return authRouter;
 }

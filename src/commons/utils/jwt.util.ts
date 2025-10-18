@@ -1,5 +1,5 @@
 import "dotenv/config";
-import jwt, {JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import { AppJwtPayload } from "@/commons/dtos/jwtPayload.schema";
 import { appEnv } from "@/configs";
 
@@ -13,8 +13,8 @@ export default class JwtUtils {
     return jwt.sign(payload, appEnv.JWT_SECRET, { expiresIn: "7d" });
   }
 
-  static verifyAccess(token: string): JwtPayload | string {
-    return jwt.verify(token, appEnv.JWT_SECRET);
+  static verifyAccess<T= AppJwtPayload>(token: string){
+    return jwt.verify(token, appEnv.JWT_SECRET) as T;
   }
 
   static verifyRefresh<T = AppJwtPayload>(token: string) {

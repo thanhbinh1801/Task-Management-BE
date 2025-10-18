@@ -13,6 +13,7 @@ import passport from "passport";
 import session from "express-session";
 import { healthCheckRouter } from "./modules/healthCheck/healthCheck.router";
 import cookieParser from "cookie-parser";
+import { errorHandler } from "./commons/exceptions/error.handler";
 
 const app: Express = express();
 
@@ -45,20 +46,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.use("/health-check", healthCheckRouter);
-app.use('/api/v1/auth', mainRouter);
+app.use('/api/v1', mainRouter);
 
 app.get("/", (_req, res) => {
   res.send('<a href="/api/v1/auth/google">Login with Google</a>');
 });
 
-app.use('/api-docs', buildOpenAPIRouter())
+app.use(buildOpenAPIRouter())
 
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(err);
-  res.status(err.status || 500).json({
-    message: err.message || "Internal Server Error",
-  });
-});
+app.use(errorHandler);
 
 app.listen(appEnv.PORT, () => {
   const { NODE_ENV, HOST, PORT } = appEnv;

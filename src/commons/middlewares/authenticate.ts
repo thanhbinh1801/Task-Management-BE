@@ -3,19 +3,22 @@ import { z } from "zod";
 import JwtUtils from "@/commons/utils/jwt.util";
 import { UnauthorizedException } from "@/commons";
 
-export function guard(schema?: z.ZodObject) {
+export const authenticate = (schema?: z.ZodObject) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers["authorization"];
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return next(new UnauthorizedException("Missing or invalid token"));
+      throw new UnauthorizedException("Missing or invalid token");
     }
 
     try {
       const token = authHeader.split(" ")[1];
       const payload = JwtUtils.verifyAccess(token);
-      (req as any).user = payload; 
+      req.users = {
+        userId: payload.userId,
+        email: payload.email
+      }; 
     } catch {
-      return next(new UnauthorizedException("Invalid or expired token"));
+      throw new UnauthorizedException("Invalid or expired token");
     }
     
     if (schema) {

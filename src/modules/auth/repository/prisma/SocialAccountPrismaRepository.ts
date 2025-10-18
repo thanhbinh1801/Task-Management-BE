@@ -13,4 +13,12 @@ export class SocialAccountsPrismaRepository implements ISocialAccountRepository 
       data
     });
   }
+  
+  async checkUserInSocialAccount ( email: string): Promise<boolean> {
+    const check = await prisma.socialAccounts.findFirst({
+      where: { user: { email}},
+      select: { id: true}
+    });
+    return !!check;
+  }
 }

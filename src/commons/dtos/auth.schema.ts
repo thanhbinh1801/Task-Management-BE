@@ -14,6 +14,5 @@ export const RegisterSchema = z.object({
     email: z.string().email().openapi({ example: 'thanhbinh1801@gmail.com' }),
     password: z.string().min(6).openapi({ example: 'password123' }),
     name: z.string().min(2).max(100).nullable().openapi({ example: 'Thanh Binh' }).optional(),
-    avatarUrl: z.string().url().nullable().openapi({ example: 'https://example.com/avatar.jpg' }).optional(),
 });
 

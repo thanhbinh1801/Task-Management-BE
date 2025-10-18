@@ -17,13 +17,13 @@ export default class AuthController {
   login = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await this.authService.login(req.body);
-      res.json(result);
-
       res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
         secure: true,
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
+      return res.json(result);
+
     } catch (exception) {
       next(exception);
     }
@@ -33,6 +33,11 @@ export default class AuthController {
     try {
       const { refreshToken } = req.body;
       const newTokens = await this.authService.refreshToken(refreshToken);
+      res.cookie(" refreshToken", newTokens.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      });
       res.json(newTokens);
     } catch (exception) {
       next(exception);
@@ -42,8 +47,7 @@ export default class AuthController {
   forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const email = req.body.email;
-      const isSuccess = await this.authService.forgotPassword(email);
-      if (!isSuccess) return res.status(400).json({ message: "Failed to send reset password email." });
+      await this.authService.forgotPassword(email);
       res.status(200).json({ message: "If the email exists, we sent a reset code." });
     } catch (exception) {
       next(exception);
@@ -53,8 +57,7 @@ export default class AuthController {
   verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, otp } = req.body;
-      const isSuccess = await this.authService.verifyEmail(email, otp);
-      if (!isSuccess) return res.status(400).json({ message: "Failed to verify email." });
+      await this.authService.verifyEmail(email, otp);
       res.status(200).json({ message: "Email verified successfully." });
     } catch (exception) {
       next(exception);
@@ -76,8 +79,7 @@ export default class AuthController {
     try {
       const userId = (req as any).user.userId;
       const { oldPassword, newPassword } = req.body;
-      const isSuccess = await this.authService.changePassword(userId, oldPassword, newPassword);
-      if (!isSuccess) return res.status(400).json({ message: "Failed to change password." });
+      await this.authService.changePassword(userId, oldPassword, newPassword);
       res.status(200).json({ message: "Password changed successfully." });
     } catch (exception) {
       next(exception);
@@ -124,18 +126,18 @@ export default class AuthController {
 
         return res.status(200).json({ message: "Login successful", data: result });
       }
-      catch(ex){
-        return next(ex);
+      catch(exception){
+        next(exception);
       }
     })(req, res, next);
   }
 
-  authFailure = (req: Request, res: Response) => {
-      return res.status(401).json({
-          success: false,
-          message: 'Authentication failed',
-          data: null,
-          code: 401
-      });
+  authFailure = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+      await this.authService.authFailed();
+    }
+    catch(exception) {
+      next(exception);
+    }
   };
 }
