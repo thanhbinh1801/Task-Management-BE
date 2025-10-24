@@ -77,7 +77,7 @@ export default class AuthController {
 
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = (req as any).user.userId;
+      const userId = req.users?.userId as string ;
       const { oldPassword, newPassword } = req.body;
       await this.authService.changePassword(userId, oldPassword, newPassword);
       res.status(200).json({ message: "Password changed successfully." });
@@ -95,6 +95,20 @@ export default class AuthController {
       await this.authService.logout(refreshToken);
       res.clearCookie("refreshToken");
       res.status(200).json({message: "Logout successful"});
+    } catch (exception) {
+      next(exception);
+    }
+  }
+
+  getMe = async ( req: Request, res: Response, next: NextFunction) => {
+    try{
+      const userId = req.users?.userId as string;
+      const user = await this.authService.getMe(userId);
+      res.status(200).json({
+        status: "Success",
+        message: "User info retrieved successfully",
+        data: user
+      });
     } catch (exception) {
       next(exception);
     }

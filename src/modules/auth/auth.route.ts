@@ -150,6 +150,14 @@ authRegistry.registerPath({
   responses: createApiResponse(z.null(), 'Success'),
 });
 
+authRegistry.registerPath({
+  path: "/api/v1/auth/me",
+  method: "get",
+  tags: ["Auth"],
+  security: [{ bearerAuth: [] }],
+  responses: createApiResponse(z.null(), 'Success'),
+});
+
 export function AuthRouter(authController: AuthController): Router {
   const authRouter = Router();
 
@@ -167,6 +175,8 @@ export function AuthRouter(authController: AuthController): Router {
   authRouter.post('/change-password', asyncHandler(authenticate()), asyncHandler(authController.changePassword));
 
   authRouter.get('/logout', asyncHandler(authController.logout));
+
+  authRouter.get('/me', asyncHandler(authenticate()), asyncHandler(authController.getMe));
   
   //Oauth2
   authRouter.get('/google', asyncHandler(authController.googleAuth));

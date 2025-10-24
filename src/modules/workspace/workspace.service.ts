@@ -6,8 +6,8 @@ import { WorkspaceCreateRequest, WorkspaceUpdateRequest } from './dtos/requests/
 export default class WorkspaceService {
   constructor(private readonly workspaceRepo: IWorkspaceRepository) {}
 
-  async getWorkspaces() : Promise<Workspace[]> {
-    const workspaces = await this.workspaceRepo.findWorkspace();
+  async getWorkspaces(userId: string) : Promise<Workspace[]> {
+    const workspaces = await this.workspaceRepo.findWorkspace(userId);
     if(workspaces.length === 0) {
       throw new NotFoundException('not found workspace');
     }

@@ -9,6 +9,7 @@ import { InternalServerException } from "@/commons/exceptions";
 import { GoogleAuthData } from "../services/interfaces/IGoogleAuthData";
 import { UserStatusEnum } from "@prisma/client";
 import UserService from "@/modules/user/user.service";
+import { UserManagementResponse } from "@/modules/user/dtos/responses";
 
 export default  class AuthService {
   constructor(
@@ -180,6 +181,14 @@ export default  class AuthService {
   async logout(refreshToken: string): Promise<void> {
     await this.tokenRepo.deleteRefreshToken(refreshToken);
     return;
+  }
+
+  async getMe(userId: string): Promise<UserManagementResponse> {
+    const user = await this.userService.getUserById(userId);
+    if (!user) {
+      throw new NotFoundException("User not found");
+    }
+    return user;
   }
 
   async processGoogleLogin(googleAuthData: GoogleAuthData){

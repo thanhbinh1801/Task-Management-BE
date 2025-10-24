@@ -97,7 +97,11 @@ boardRegistry.registerPath({
 });
 
 
-export function BoardRouter( boardController: BoardController) : Router {
+export function BoardRouter( 
+  boardController: BoardController, 
+  memberBoardRouter: Router, 
+  boardJoinLinkRouter: Router) : Router 
+  {
   const boardRouter = Router({ mergeParams: true });
 
   boardRouter.get('/', asyncHandler(authenticate()), asyncHandler(boardController.getBoards));
@@ -105,6 +109,9 @@ export function BoardRouter( boardController: BoardController) : Router {
   boardRouter.post('/', asyncHandler(authenticate()), asyncHandler(boardController.createBoard));
   boardRouter.put('/:boardId', asyncHandler(authenticate()), asyncHandler(boardController.updateBoard));
   boardRouter.delete('/:boardId', asyncHandler(authenticate()), asyncHandler(boardController.deleteBoard));
+
+  boardRouter.use("/:boardId/board-join-link", boardJoinLinkRouter);  
+  boardRouter.use("/:boardId/member-board", memberBoardRouter);
 
   return boardRouter;
 }

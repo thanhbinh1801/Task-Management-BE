@@ -23,8 +23,12 @@
           { permissionName: 'DELETE_LIST', description: 'delete list'},
           // member
           { permissionName: 'ADD_MEMBER', description: "add member to workspace or board"},
+          { permissionName: 'VIEW_MEMBER', description: "view member in workspace or board"},
           { permissionName: 'CHANGE_MEMBER_PERMISSION', description: 'change user permission'},
-          { permissionName: 'REMOVE_MEMBER', description: 'remove member over workspace or board'}
+          { permissionName: 'REMOVE_MEMBER', description: 'remove member over workspace or board'},
+
+          //join-link
+          { permissionName: 'MANAGE_JOIN_LINK', description: 'manage join link'},
         ],
         skipDuplicates: true,
       });
@@ -62,31 +66,31 @@
       const adminPermissions = allPermissions.filter( p => 
       ['VIEW_WORKSPACE', 'UPDATE_WORKSPACE', 'DELETE_WORKSPACE', 'CREATE_BOARD','VIEW_BOARD' ,'UPDATE_BOARD', 'DELETE_BOARD',
         'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER'
+        'ADD_MEMBER', 'VIEW_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       const ownerWorkspacePermissions = allPermissions.filter( p => 
       [ 'VIEW_WORKSPACE', 'UPDATE_WORKSPACE', 'DELETE_WORKSPACE', 'CREATE_BOARD','VIEW_BOARD' ,'UPDATE_BOARD', 'DELETE_BOARD',
         'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER'
+        'ADD_MEMBER', 'VIEW_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       const ownerBoardPermissions = allPermissions.filter( p => 
       [ 'VIEW_BOARD' ,'UPDATE_BOARD', 'DELETE_BOARD',
         'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER'
+        'ADD_MEMBER', 'VIEW_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       const memberWorkspacePermissions = allPermissions.filter( p => 
       [ 'VIEW_WORKSPACE', 'CREATE_BOARD', 'VIEW_BOARD' ,'UPDATE_BOARD', 'DELETE_BOARD',
         'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER'
+        'ADD_MEMBER', 'VIEW_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       const memberBoardPermissions = allPermissions.filter( p => 
       [ 'VIEW_BOARD' ,'UPDATE_BOARD',
         'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER'
+        'ADD_MEMBER', 'VIEW_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       for( const p of adminPermissions){

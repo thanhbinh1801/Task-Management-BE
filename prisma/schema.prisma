@@ -75,6 +75,7 @@ model Workspace {
 
   boards  Board[]
   members WorkspaceMember[]
+  joinLinks  WorkspaceJoinLink[] 
 }
 
 model WorkspaceMember {
@@ -93,6 +94,22 @@ model WorkspaceMember {
   @@index([workspaceId])
 }
 
+model WorkspaceJoinLink {
+  id          String   @id @default(cuid())    
+  createdById String        
+  workspaceId String
+  token       String   @unique
+  expiresAt   DateTime
+  isRevoke    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdBy User      @relation(fields: [createdById], references: [id])
+
+  @@index([workspaceId])   
+}
+
 model Board {
   id          String    @id @default(cuid())
   title       String
@@ -103,6 +120,7 @@ model Board {
 
   workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   members   BoardMember[]
+  joinLinks BoardJoinLink[]
 
   @@index([workspaceId])
 }
@@ -122,6 +140,22 @@ model BoardMember {
   @@id([userId, boardId]) // 1 role / board
   @@index([roleId])
   @@index([boardId])
+}
+
+model BoardJoinLink {
+  id          String   @id @default(cuid())    
+  createdById String        
+  boardId     String
+  token       String   @unique
+  expiresAt   DateTime
+  isRevoke    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  board Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  createdBy User    @relation(fields: [createdById], references: [id])
+
+  @@index([boardId])   
 }
 
 model User {
@@ -144,6 +178,8 @@ model User {
   workspaces WorkspaceMember[]
   boards     BoardMember[]
   UserRole   UserRole[]
+  createdJoinLinkWorkspaces  WorkspaceJoinLink[]
+  createdJoinLinkBoards  BoardJoinLink[]
 }
 
 model Account {

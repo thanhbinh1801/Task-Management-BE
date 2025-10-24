@@ -24,7 +24,7 @@ workspaceRegistry.registerPath({
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      id: z.string()
+      workspaceId: z.string()
     })
   },
   responses: createApiResponse(z.null() , "Success"),
@@ -43,7 +43,7 @@ workspaceRegistry.registerPath({
           example: {
             name: "Thanh Binh Workspace",
             visibility: WorkspaceStatusEnum.PUBLIC,
-            userId: "cmgnmi9e90000ugtgblicw0hz"
+            // userId: "cmgnmi9e90000ugtgblicw0hz"
           },
         },
       },
@@ -59,7 +59,7 @@ workspaceRegistry.registerPath({
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      id: z.string()
+      workspaceId: z.string()
     }),
      body: {
       content: {
@@ -83,29 +83,29 @@ workspaceRegistry.registerPath({
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      id: z.string()
+      workspaceId: z.string()
     })
   },
   responses: createApiResponse(z.null() , "Success"),
 });
 
-export function WorkspaceRouter(workspaceController: WorkspaceController, boardRouter: Router) : Router {
+export function WorkspaceRouter(workspaceController: WorkspaceController, boardRouter: Router, workspaceJoinLinkRouter: Router, memberWorkspaceRouter: Router) : Router {
   const workspaceRouter = Router();
 
   workspaceRouter.get('/', asyncHandler(authenticate()), asyncHandler(authorize(['VIEW_WORKSPACE'], "global")), 
                         asyncHandler(workspaceController.getWorkspaces));
-  workspaceRouter.get('/:id', asyncHandler(authenticate()), asyncHandler(authorize(['VIEW_WORKSPACE'], "workspace")),
+  workspaceRouter.get('/:workspaceId', asyncHandler(authenticate()), asyncHandler(authorize(['VIEW_WORKSPACE'], "workspace")),
                         asyncHandler(workspaceController.getWorkspaceById));
   workspaceRouter.post('/', asyncHandler(authenticate()), asyncHandler(authorize(['CREATE_WORKSPACE'], "global")), 
                         asyncHandler(workspaceController.createWorkspace));
-  workspaceRouter.put('/:id', asyncHandler(authenticate()), asyncHandler(authorize(['UPDATE_WORKSPACE'], "workspace")), 
+  workspaceRouter.put('/:workspaceId', asyncHandler(authenticate()), asyncHandler(authorize(['UPDATE_WORKSPACE'], "workspace")), 
                         asyncHandler(workspaceController.updateWorkspace));
-  workspaceRouter.delete('/:id', asyncHandler(authenticate()), asyncHandler(authorize(['DELETE_WORKSPACE'], "workspace")), 
-                        asyncHandler(workspaceController.deleteWorkspace));
-  workspaceRouter.delete('/:id', asyncHandler(authenticate()), asyncHandler(authorize(['DELETE_WORKSPACE'], "workspace")), 
-                        asyncHandler(workspaceController.deleteWorkspace));                  
+  workspaceRouter.delete('/:workspaceId', asyncHandler(authenticate()), asyncHandler(authorize(['DELETE_WORKSPACE'], "workspace")), 
+                        asyncHandler(workspaceController.deleteWorkspace));                 
 
   workspaceRouter.use("/:workspaceId/board", boardRouter);  
+  workspaceRouter.use("/:workspaceId/link", workspaceJoinLinkRouter);
+  workspaceRouter.use("/:workspaceId/members", memberWorkspaceRouter);
 
   return workspaceRouter;
 }

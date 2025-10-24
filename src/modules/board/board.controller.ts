@@ -55,7 +55,6 @@ export default class BoardController {
 
       const { nameBoard } = BoardCreateRequestSchema.parse(req.body);
       const boardData = { nameBoard }
-      console.log( "boarddata:", boardData);
       const newBoard = await this.boardService.createBoard(boardData, workspaceId, userId);
       res.status(201).json({
         status: "success",

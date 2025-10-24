@@ -6,7 +6,7 @@ import { appEnv } from "@/configs";
 
 export default class JwtUtils {
   static signAccess(payload: AppJwtPayload): string {
-    return jwt.sign(payload, appEnv.JWT_SECRET, { expiresIn: "15m" });
+    return jwt.sign(payload, appEnv.JWT_SECRET, { expiresIn: "60m" });
   }
 
   static signRefresh(payload: AppJwtPayload): string {
