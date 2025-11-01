@@ -23,7 +23,7 @@ export default class UserController {
 
   getUserById = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.params.id;
+      const userId = req.params.userId;
       if(!userId) {
         throw new BadRequestException("user id not found");
       }

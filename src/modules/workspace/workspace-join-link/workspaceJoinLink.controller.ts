@@ -7,7 +7,7 @@ export default class WorkspaceJoinLinkController{
 
   createLink = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const workspaceId = req.params.id;
+      const workspaceId = req.params.workspaceId;
       if(!workspaceId) {
         throw new BadRequestException(' workspaceId not found');
       }

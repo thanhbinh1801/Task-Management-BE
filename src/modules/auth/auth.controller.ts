@@ -19,10 +19,14 @@ export default class AuthController {
       const result = await this.authService.login(req.body);
       res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
-      return res.json(result);
+      return res.json({
+        accessToken: result.accessToken,
+        user: result.user
+      });
 
     } catch (exception) {
       next(exception);
@@ -33,6 +37,12 @@ export default class AuthController {
     try {
       const { refreshToken } = req.body;
       const newTokens = await this.authService.refreshToken(refreshToken);
+      res.cookie("accessToken", newTokens.accessToken, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 15 * 60 * 1000 // 15 minutes
+      });
+      
       res.cookie(" refreshToken", newTokens.refreshToken, {
         httpOnly: true,
         secure: true,
@@ -134,11 +144,13 @@ export default class AuthController {
         const result = await this.authService.processGoogleLogin(user);
         res.cookie("refreshToken", result?.refreshToken, {
           httpOnly: true,
-          secure: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
           maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
-        return res.status(200).json({ message: "Login successful", data: result });
+        // Redirect về dashboard với accessToken trong URL để frontend lưu vào localStorage
+        return res.redirect(`${process.env.CORS_ORIGIN}/dashboard`);
       }
       catch(exception){
         next(exception);

@@ -197,8 +197,10 @@ export default  class AuthService {
       throw new UnauthorizedException("Google account has no email");
     }
     const existingUser = await this.userService.getUserByEmail(user.email);
-    
-    if(!existingUser){
+    if(existingUser){
+      return { user: existingUser, accessToken, refreshToken  };
+    }
+    else{
       const createdUser = await this.userService.createGoogleUser({
         email: user.email,
         name: user.name ?? "",

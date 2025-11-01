@@ -12,6 +12,11 @@ workspaceJoinLinkRegistry.registerPath({
   method: "post",
   tags: ["Workspace-Join-Link"],
   security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({
+      workspaceId: z.string()
+    })
+  },
   responses: createApiResponse(z.null() , "Success"),
 });
 
@@ -20,6 +25,11 @@ workspaceJoinLinkRegistry.registerPath({
   method: "post",
   tags: ["Workspace-Join-Link"],
   security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({
+      linkId: z.string()
+    })
+  },
   responses: createApiResponse(z.null() , "Success"),
 });
 

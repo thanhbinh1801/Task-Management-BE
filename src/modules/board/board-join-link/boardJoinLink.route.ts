@@ -8,26 +8,28 @@ import z from "zod";
 export const boardJoinLinkRegistry = new OpenAPIRegistry();
 
 boardJoinLinkRegistry.registerPath({
-  path: '/api/v1/board/{boardId}/board-join-link',
+  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/board-join-link',
   method: "post",
   tags: ["Board Join Link"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
+      workspaceId: z.string(),
       boardId: z.string(),
-      userId: z.string(),
     })
   },
   responses: createApiResponse(z.null() , "Success"),
 });
 
 boardJoinLinkRegistry.registerPath({
-  path: '/api/v1/board/{boardId}/board-join-link/{linkId}',
+  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/board-join-link/{linkId}',
   method: "delete",
   tags: ["Board Join Link"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
+      workspaceId: z.string(),
+      boardId: z.string(),
       linkId: z.string()
     })
   },

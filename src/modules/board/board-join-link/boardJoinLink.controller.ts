@@ -7,7 +7,7 @@ export default class BoardJoinLinkController{
 
   createLink = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const boardId = req.params.id;
+      const boardId = req.params.boardId;
       if(!boardId) {
         throw new BadRequestException(' boardId not found');
       }

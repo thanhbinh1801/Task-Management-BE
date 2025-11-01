@@ -38,6 +38,14 @@ import MemberBoardRepository from "@/modules/board/member-board/repositories/pri
 import MemberBoardController from "@/modules/board/member-board/member.board.controller";
 import MemberBoardService from "@/modules/board/member-board/member.board.service";
 import { MemberBoardRouter } from "@/modules/board/member-board/member.board.route";
+import { ListPrismaRepository } from "@/modules/list/repository/prisma/ListPrismaRepository";
+import { ListService } from "@/modules/list/list.service";
+import ListController from "@/modules/list/list.controller";
+import { ListRouter } from "@/modules/list/list.route";
+import { CardRouter } from "@/modules/card/card.route";
+import CardController from "@/modules/card/card.controller";
+import { CardService } from "@/modules/card/card.service";
+import { CardPrismaRepository } from "@/modules/card/repository/prisma/CardPrismaRepository";
 
 
 const mainRouter = Router();
@@ -64,8 +72,29 @@ const initUserRouter = () => {
   mainRouter.use("/user", UserRouter(userController));
 }
 
-const initWorkspaceRouter = () => {
-  //board router dependencies
+const initCardRouter = () => {
+  const cardRepository = new CardPrismaRepository();
+  const cardService = new CardService(cardRepository);
+  const cardController = new CardController(cardService);
+
+  return CardRouter(cardController);
+}
+
+const initListRouter = () => {
+  const cardRouter = initCardRouter();
+  
+  const listRepository = new ListPrismaRepository();
+  const listService = new ListService(listRepository);
+  const listController = new ListController(listService);
+  const listRouter = ListRouter(listController, cardRouter);
+
+  return listRouter;
+}
+
+const initBoardRouter = () => {
+
+  const listRouter = initListRouter();
+
   const boardJoinLinkRepository = new BoardJoinLinkRepository();
   const boardJoinLinkService = new BoardJoinLinkService(boardJoinLinkRepository);
   const boardJoinLinkController = new BoardJoinLinkController(boardJoinLinkService);
@@ -79,7 +108,13 @@ const initWorkspaceRouter = () => {
   const boardRepository = new BoardPrismaRepository();
   const boardService = new BoardService(boardRepository);
   const boardController = new BoardController(boardService);
-  const boardRouter = BoardRouter(boardController, memberBoardRouter, boardJoinLinkRouter);
+  const boardRouter = BoardRouter(boardController, memberBoardRouter, boardJoinLinkRouter, listRouter);
+
+  return boardRouter;
+}
+
+const initWorkspaceRouter = () => {
+  const boardRouter = initBoardRouter();
   
   //workspace router dependencies
   const workspaceJoinLinkRepository = new WorkspaceJoinLinkRepository();
@@ -97,7 +132,7 @@ const initWorkspaceRouter = () => {
   const workspaceController = new WorkspaceController(workspaceService);
 
 
-  mainRouter.use("/workspace", WorkspaceRouter(workspaceController, boardRouter, workspaceJoinLinkRouter, memberWorkspaceRouter));
+  mainRouter.use("/workspace", WorkspaceRouter(workspaceController, workspaceJoinLinkRouter, memberWorkspaceRouter, boardRouter));
 }
 
 initAuthRouter();

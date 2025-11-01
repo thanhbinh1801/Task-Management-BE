@@ -9,13 +9,17 @@ import { boardRegistry } from "@/modules/board/board.route";
 import { boardJoinLinkRegistry } from "@/modules/board/board-join-link/boardJoinLink.route";
 import { memberBoardRegistry } from "@/modules/board/member-board/member.board.route";
 
+import { listRegistry } from "@/modules/list/list.route";
+import { cardRegistry } from "@/modules/card/card.route";
+
 import { OpenApiGeneratorV3, OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 
 export function generateOpenAPIDocument() {
     const registry = new OpenAPIRegistry(
         [authRegistry, healthCheckRegistry, userRegistry, 
         workspaceRegistry, workspaceJoinLinkRegistry, memberWorkspaceRegistry, 
-        boardRegistry, boardJoinLinkRegistry, memberBoardRegistry]
+        boardRegistry, boardJoinLinkRegistry, memberBoardRegistry,
+        listRegistry, cardRegistry]
     );
     const generator = new OpenApiGeneratorV3(registry.definitions)
 

@@ -7,7 +7,8 @@ type Scope = "workspace" | "board" | "global";
 export const authorize = (requiredPermissions: string[], scope: Scope) => {
   return async ( req: Request, res: Response, next: NextFunction) => {
     try {
-      if(!req.users?.userId){
+      const userId = req.users?.userId;
+      if(!userId){
         return res.status(401).json({message: "Unauthorized error"});
       }
       if (scope === "global") {
@@ -15,8 +16,11 @@ export const authorize = (requiredPermissions: string[], scope: Scope) => {
         return next();
       }
 
-      const workspaceId = req.params.id;
+      const workspaceId = req.params.workspaceId;
       console.log("workspaceId: ", workspaceId)
+
+      const boardId = req.params.boardId;
+      console.log("boardId: ", boardId);
 
       if(!workspaceId) {
         throw new BadRequestException("khong co id trong param")
@@ -25,7 +29,7 @@ export const authorize = (requiredPermissions: string[], scope: Scope) => {
       let membership;
       if( scope == "workspace"){
         membership = await prisma.workspaceMember.findUnique({
-          where: { userId_workspaceId: {userId: req.users.userId, workspaceId: req.params.id}},
+          where: { userId_workspaceId: {userId: userId, workspaceId: workspaceId}},
           select: {
             role: {
               select: {
@@ -38,7 +42,7 @@ export const authorize = (requiredPermissions: string[], scope: Scope) => {
         });
       } else {
         membership = await  prisma.boardMember.findUnique({
-          where: { userId_boardId: { userId: req.users.userId, boardId: req.params.id}},
+          where: { userId_boardId: { userId: userId, boardId: boardId}},
           select: {
             role: {
               select: {
@@ -52,7 +56,7 @@ export const authorize = (requiredPermissions: string[], scope: Scope) => {
       }
 
       if(!membership){
-        return res.status(403).json({message: "Forbidden: not a board member"});
+        return res.status(403).json({message: "Forbidden: not a member"});
       }
 
       const permissionSet = new Set(

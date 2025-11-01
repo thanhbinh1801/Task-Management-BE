@@ -34,7 +34,7 @@ model Role {
   boardMembers     BoardMember[]
   RolePermission   RolePermission[]
   UserRole         UserRole[]
-} 
+}
 
 model Permission {
   id             String           @id @default(cuid())
@@ -66,16 +66,16 @@ model UserRole {
 }
 
 model Workspace {
-  id        String    @id @default(cuid())
-  name      String
+  id         String              @id @default(cuid())
+  name       String
   visibility WorkspaceStatusEnum @default(PUBLIC)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+  deletedAt  DateTime?
 
-  boards  Board[]
-  members WorkspaceMember[]
-  joinLinks  WorkspaceJoinLink[] 
+  boards    Board[]
+  members   WorkspaceMember[]
+  joinLinks WorkspaceJoinLink[]
 }
 
 model WorkspaceMember {
@@ -95,19 +95,19 @@ model WorkspaceMember {
 }
 
 model WorkspaceJoinLink {
-  id          String   @id @default(cuid())    
-  createdById String        
+  id          String   @id @default(cuid())
+  createdById String
   workspaceId String
   token       String   @unique
   expiresAt   DateTime
-  isRevoke    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isRevoke    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   createdBy User      @relation(fields: [createdById], references: [id])
 
-  @@index([workspaceId])   
+  @@index([workspaceId])
 }
 
 model Board {
@@ -118,16 +118,16 @@ model Board {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  workspace Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   members   BoardMember[]
   joinLinks BoardJoinLink[]
+  List      List[]
 
   @@index([workspaceId])
 }
 
-
 model BoardMember {
-  userId    String  
+  userId    String
   boardId   String
   roleId    String
   createdAt DateTime @default(now())
@@ -143,19 +143,43 @@ model BoardMember {
 }
 
 model BoardJoinLink {
-  id          String   @id @default(cuid())    
-  createdById String        
+  id          String   @id @default(cuid())
+  createdById String
   boardId     String
   token       String   @unique
   expiresAt   DateTime
-  isRevoke    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  isRevoke    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  board Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  createdBy User    @relation(fields: [createdById], references: [id])
+  board     Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  createdBy User  @relation(fields: [createdById], references: [id])
 
-  @@index([boardId])   
+  @@index([boardId])
+}
+
+model List {
+  id        String    @id @default(cuid())
+  name      String
+  boardId   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  Card  Card[]
+}
+
+model Card {
+  id         String    @id @default(cuid())
+  name       String
+  listId     String
+  isComplete Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
+
+  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -175,11 +199,11 @@ model User {
   socialAccounts SocialAccounts[]
 
   // memberships
-  workspaces WorkspaceMember[]
-  boards     BoardMember[]
-  UserRole   UserRole[]
-  createdJoinLinkWorkspaces  WorkspaceJoinLink[]
-  createdJoinLinkBoards  BoardJoinLink[]
+  workspaces                WorkspaceMember[]
+  boards                    BoardMember[]
+  UserRole                  UserRole[]
+  createdJoinLinkWorkspaces WorkspaceJoinLink[]
+  createdJoinLinkBoards     BoardJoinLink[]
 }
 
 model Account {

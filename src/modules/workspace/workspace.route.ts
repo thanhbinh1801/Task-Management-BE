@@ -89,7 +89,12 @@ workspaceRegistry.registerPath({
   responses: createApiResponse(z.null() , "Success"),
 });
 
-export function WorkspaceRouter(workspaceController: WorkspaceController, boardRouter: Router, workspaceJoinLinkRouter: Router, memberWorkspaceRouter: Router) : Router {
+export function WorkspaceRouter(
+    workspaceController: WorkspaceController, 
+    workspaceJoinLinkRouter: Router, 
+    memberWorkspaceRouter: Router,
+    boardRouter: Router
+  ) : Router {
   const workspaceRouter = Router();
 
   workspaceRouter.get('/', asyncHandler(authenticate()), asyncHandler(authorize(['VIEW_WORKSPACE'], "global")), 
