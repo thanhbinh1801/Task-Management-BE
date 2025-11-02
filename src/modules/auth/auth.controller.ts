@@ -19,10 +19,14 @@ export default class AuthController {
       const result = await this.authService.login(req.body);
       res.cookie("refreshToken", result.refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
-      return res.json(result);
+      return res.json({
+        accessToken: result.accessToken,
+        user: result.user
+      });
 
     } catch (exception) {
       next(exception);
@@ -33,6 +37,12 @@ export default class AuthController {
     try {
       const { refreshToken } = req.body;
       const newTokens = await this.authService.refreshToken(refreshToken);
+      res.cookie("accessToken", newTokens.accessToken, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 15 * 60 * 1000 // 15 minutes
+      });
+      
       res.cookie(" refreshToken", newTokens.refreshToken, {
         httpOnly: true,
         secure: true,
@@ -77,7 +87,7 @@ export default class AuthController {
 
   changePassword = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = (req as any).user.userId;
+      const userId = req.users?.userId as string ;
       const { oldPassword, newPassword } = req.body;
       await this.authService.changePassword(userId, oldPassword, newPassword);
       res.status(200).json({ message: "Password changed successfully." });
@@ -95,6 +105,20 @@ export default class AuthController {
       await this.authService.logout(refreshToken);
       res.clearCookie("refreshToken");
       res.status(200).json({message: "Logout successful"});
+    } catch (exception) {
+      next(exception);
+    }
+  }
+
+  getMe = async ( req: Request, res: Response, next: NextFunction) => {
+    try{
+      const userId = req.users?.userId as string;
+      const user = await this.authService.getMe(userId);
+      res.status(200).json({
+        status: "Success",
+        message: "User info retrieved successfully",
+        data: user
+      });
     } catch (exception) {
       next(exception);
     }
@@ -120,11 +144,13 @@ export default class AuthController {
         const result = await this.authService.processGoogleLogin(user);
         res.cookie("refreshToken", result?.refreshToken, {
           httpOnly: true,
-          secure: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
           maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
-        return res.status(200).json({ message: "Login successful", data: result });
+        // Redirect về dashboard với accessToken trong URL để frontend lưu vào localStorage
+        return res.redirect(`${process.env.CORS_ORIGIN}/dashboard`);
       }
       catch(exception){
         next(exception);

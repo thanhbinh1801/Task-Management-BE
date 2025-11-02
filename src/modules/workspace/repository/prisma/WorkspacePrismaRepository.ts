@@ -4,9 +4,14 @@ import { prisma } from "@/configs";
 import { WorkspaceCreateRequest, WorkspaceUpdateRequest } from '../../dtos/requests/workspace.request';
 
 export class WorkspacePrismaRepository implements IWorkspaceRepository {
-  async findWorkspace(): Promise<Workspace[]> {
+  async findWorkspace(userId: string): Promise<Workspace[]> {
     return prisma.workspace.findMany({
-      where: { deletedAt: null}
+      where: { 
+        deletedAt: null,
+        members: {
+          some: { userId: userId}
+        }
+      }
     });
   }
 

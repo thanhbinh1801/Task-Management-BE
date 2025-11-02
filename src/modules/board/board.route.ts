@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { asyncHandler } from "@/commons";
+import { asyncHandler, authorize } from "@/commons";
 import BoardController from "./board.controller";
 import { OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
 import { createApiResponse } from "@/swagger";
@@ -97,14 +97,29 @@ boardRegistry.registerPath({
 });
 
 
-export function BoardRouter( boardController: BoardController) : Router {
+export function BoardRouter( 
+  boardController: BoardController, 
+  memberBoardRouter: Router,
+  boardJoinLinkRouter: Router,
+  listRouter: Router
+) : Router 
+  {
   const boardRouter = Router({ mergeParams: true });
 
-  boardRouter.get('/', asyncHandler(authenticate()), asyncHandler(boardController.getBoards));
-  boardRouter.get('/:boardId', asyncHandler(authenticate()), asyncHandler(boardController.getBoardById));
-  boardRouter.post('/', asyncHandler(authenticate()), asyncHandler(boardController.createBoard));
-  boardRouter.put('/:boardId', asyncHandler(authenticate()), asyncHandler(boardController.updateBoard));
-  boardRouter.delete('/:boardId', asyncHandler(authenticate()), asyncHandler(boardController.deleteBoard));
+  boardRouter.get('/', asyncHandler(authenticate()),asyncHandler(authorize(['VIEW_BOARD'], "workspace")),
+                       asyncHandler(boardController.getBoards));
+  boardRouter.get('/:boardId', asyncHandler(authenticate()), asyncHandler(authorize(['VIEW_BOARD'], "board")),
+                       asyncHandler(boardController.getBoardById));
+  boardRouter.post('/', asyncHandler(authenticate()), asyncHandler(authorize(['CREATE_BOARD'], "workspace")),
+                       asyncHandler(boardController.createBoard));
+  boardRouter.put('/:boardId', asyncHandler(authenticate()), asyncHandler(authorize(['UPDATE_BOARD'], "board")),
+                       asyncHandler(boardController.updateBoard));
+  boardRouter.delete('/:boardId', asyncHandler(authenticate()), asyncHandler(authorize(['DELETE_BOARD'], "board")),
+                       asyncHandler(boardController.deleteBoard));
+
+  boardRouter.use("/:boardId/board-join-link", boardJoinLinkRouter);  
+  boardRouter.use("/:boardId/member-board", memberBoardRouter);
+  boardRouter.use("/:boardId/list", listRouter);
 
   return boardRouter;
 }

@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy , Profile, VerifyCallback } from "passport-google-oauth20";
 import { appEnv } from "@/configs";
-import prisma from "@/configs/prisma";
+// import prisma from "@/configs/prisma";
 
 export class GoogleStrategy {
   constructor(){

@@ -15,16 +15,22 @@
           { permissionName: 'DELETE_BOARD', description: 'delete board'},
           // card
           { permissionName: 'CREATE_CARD', description: 'create card'},
+          { permissionName: 'VIEW_CARD', description: 'view card'},
           { permissionName: 'UPDATE_CARD', description: 'update information of card'},
           { permissionName: 'DELETE_CARD', description: 'delete card'},
           // list
           { permissionName: 'CREATE_LIST', description: 'create list'},
+          { permissionName: 'VIEW_LIST', description: 'view list'},
           { permissionName: 'UPDATE_LIST',description: 'update information of list'},
           { permissionName: 'DELETE_LIST', description: 'delete list'},
           // member
           { permissionName: 'ADD_MEMBER', description: "add member to workspace or board"},
+          { permissionName: 'VIEW_MEMBER', description: "view member in workspace or board"},
           { permissionName: 'CHANGE_MEMBER_PERMISSION', description: 'change user permission'},
-          { permissionName: 'REMOVE_MEMBER', description: 'remove member over workspace or board'}
+          { permissionName: 'REMOVE_MEMBER', description: 'remove member over workspace or board'},
+
+          //join-link
+          { permissionName: 'MANAGE_JOIN_LINK', description: 'manage join link'},
         ],
         skipDuplicates: true,
       });
@@ -61,34 +67,34 @@
 
       const adminPermissions = allPermissions.filter( p => 
       ['VIEW_WORKSPACE', 'UPDATE_WORKSPACE', 'DELETE_WORKSPACE', 'CREATE_BOARD','VIEW_BOARD' ,'UPDATE_BOARD', 'DELETE_BOARD',
-        'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER'
+        'CREATE_CARD', 'VIEW_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'VIEW_LIST','UPDATE_LIST',
+        'ADD_MEMBER', 'VIEW_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       const ownerWorkspacePermissions = allPermissions.filter( p => 
       [ 'VIEW_WORKSPACE', 'UPDATE_WORKSPACE', 'DELETE_WORKSPACE', 'CREATE_BOARD','VIEW_BOARD' ,'UPDATE_BOARD', 'DELETE_BOARD',
-        'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER'
+        'CREATE_CARD', 'VIEW_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'VIEW_LIST','UPDATE_LIST',
+        'ADD_MEMBER', 'VIEW_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       const ownerBoardPermissions = allPermissions.filter( p => 
       [ 'VIEW_BOARD' ,'UPDATE_BOARD', 'DELETE_BOARD',
-        'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER'
+        'CREATE_CARD', 'VIEW_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'VIEW_LIST','UPDATE_LIST',
+        'ADD_MEMBER', 'VIEW_MEMBER', 'CHANGE_MEMBER_PERMISSION',  'REMOVE_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       const memberWorkspacePermissions = allPermissions.filter( p => 
       [ 'VIEW_WORKSPACE', 'CREATE_BOARD', 'VIEW_BOARD' ,'UPDATE_BOARD', 'DELETE_BOARD',
-        'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER'
+        'CREATE_CARD', 'VIEW_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'VIEW_LIST','UPDATE_LIST',
+        'ADD_MEMBER', 'VIEW_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
 
       const memberBoardPermissions = allPermissions.filter( p => 
       [ 'VIEW_BOARD' ,'UPDATE_BOARD',
-        'CREATE_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'CREATE_LIST','CREATE_LIST',
-        'ADD_MEMBER'
+        'CREATE_CARD', 'VIEW_CARD', 'UPDATE_CARD', 'DELETE_CARD', 'CREATE_LIST', 'VIEW_LIST','UPDATE_LIST',
+        'ADD_MEMBER', 'VIEW_MEMBER', 'MANAGE_JOIN_LINK'
       ].includes(p.permissionName));
-
+      
       for( const p of adminPermissions){
         await prisma.rolePermission.upsert({
           where: { roleId_permissionId: {roleId: admin.id, permissionId: p.id}},

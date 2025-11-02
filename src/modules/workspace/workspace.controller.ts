@@ -8,7 +8,11 @@ export default class WorkspaceController {
 
   getWorkspaces = async (req: Request, res: Response, next: NextFunction) => {
     try{
-      const allWorkspace = await this.workspaceService.getWorkspaces();
+      const userId = req.users?.userId;
+      if(!userId) {
+        throw new BadRequestException(' user id not found');
+      }
+      const allWorkspace = await this.workspaceService.getWorkspaces(userId);
       res.status(200).json({
         status: "success",
         message: "get workspace successfully",
@@ -21,7 +25,7 @@ export default class WorkspaceController {
 
   getWorkspaceById = async (req: Request, res: Response, next: NextFunction) => {
     try{
-      const workspaceId = req.params.id;
+      const workspaceId = req.params.workspaceId;
       const workspace = await this.workspaceService.getWorkspaceById(workspaceId);
       res.status(200).json({
         status: "success",
@@ -53,7 +57,7 @@ export default class WorkspaceController {
   
   updateWorkspace = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const workspaceId = req.params.id;
+      const workspaceId = req.params.workspaceId;
       const dataWorkspace = WorkspaceUpdateRequestSchema.parse(req.body);
       if(!dataWorkspace) {
         throw new BadRequestException('data workspace not found');
@@ -71,7 +75,7 @@ export default class WorkspaceController {
 
   deleteWorkspace = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const workspaceId = req.params.id;
+      const workspaceId = req.params.workspaceId;
       if(!workspaceId) {
         throw new BadRequestException(' workspace id not found');
       }
