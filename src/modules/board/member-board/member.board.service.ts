@@ -1,9 +1,12 @@
 import { BoardMember } from "@prisma/client";
 import { IMemberBoardRepository } from "./repositories/interfaces/IMemberBoardRepository";
 import { InternalServerException } from "@/commons";
+import { IUserRepository } from "@/modules/user/repository/interface/IUserRepository";
 
 export default class MemberBoardService {
-  constructor(private readonly memberRepo: IMemberBoardRepository) {}
+  constructor(private readonly memberRepo: IMemberBoardRepository
+    , private readonly userRepo: IUserRepository
+  ) {}
 
   async addMemberBoardByEmail(email: string, boardId: string): Promise<BoardMember | null>{
     const newMember = await this.memberRepo.addMemberBoard(email, boardId);
@@ -37,11 +40,12 @@ export default class MemberBoardService {
     return removedMember;
   }
 
-  async addMemberBoardByLink(token: string): Promise<BoardMember | null> {
-    const { email, boardId } = await this.memberRepo.getEmailAndBoardIdByLink(token);
-    if (!email || !boardId) {
-      throw new InternalServerException("can not get email or boardId from link");
+  async addMemberBoardByLink(token: string, userId: string): Promise<BoardMember | null> {
+    const userRecord = await this.userRepo.findById(userId);
+    const { boardId } = await this.memberRepo.getBoardIdByLink(token);
+    if (!userRecord || !boardId) {
+      throw new InternalServerException("can not get userRecord or boardId from link");
     }
-    return this.addMemberBoardByEmail(email, boardId);
+    return this.addMemberBoardByEmail(userRecord.email, boardId);
   }
 }

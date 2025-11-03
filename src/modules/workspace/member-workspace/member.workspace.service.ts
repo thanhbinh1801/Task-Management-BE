@@ -1,9 +1,12 @@
 import { WorkspaceMember } from "@prisma/client";
 import { IMemberWorkspaceRepository } from "./repositories/interfaces/IMemberRepository";
 import { InternalServerException } from "@/commons";
+import { IUserRepository } from "@/modules/user/repository/interface/IUserRepository";
 
 export default class MemberWorkspaceService {
-  constructor(private readonly memberRepo: IMemberWorkspaceRepository) {}
+  constructor(private readonly memberRepo: IMemberWorkspaceRepository
+    , private readonly userRepo: IUserRepository
+  ) {}
 
   async addMemberWorkspaceByEmail(email: string, workspaceId: string): Promise<WorkspaceMember | null>{
     const newMember = await this.memberRepo.addMemberWorkspace(email, workspaceId);
@@ -37,11 +40,15 @@ export default class MemberWorkspaceService {
     return removedMember;
   }
 
-  async addMemberWorkspaceByLink(token: string): Promise<WorkspaceMember | null> {
-    const { email, workspaceId } = await this.memberRepo.getEmailAndWorkspaceIdByLink(token);
-    if (!email || !workspaceId) {
-      throw new InternalServerException("can not get email or workspaceId from link");
+  async addMemberWorkspaceByLink(token: string, userId: string): Promise<WorkspaceMember | null> {
+    const userRecord = await this.userRepo.findById(userId);
+    if (!userRecord) {
+      throw new InternalServerException("User not found");
     }
-    return this.addMemberWorkspaceByEmail(email, workspaceId);
+    const { workspaceId } = await this.memberRepo.getWorkspaceIdByLink(token);
+    if (!workspaceId) {
+      throw new InternalServerException("can not get workspaceId from link");
+    }
+    return this.addMemberWorkspaceByEmail(userRecord.email, workspaceId);
   }
 }

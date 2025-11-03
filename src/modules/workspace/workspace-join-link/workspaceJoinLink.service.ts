@@ -1,18 +1,19 @@
-import { WorkspaceJoinLink } from "@prisma/client";
+// import { WorkspaceJoinLink } from "@prisma/client";
 import { randomBytes } from "crypto";
 import { IWorkspaceJoinLinkRepository } from "./repository/intefaces/IWorkspaceJoinLinkRepository";
 import { InternalServerException } from "@/commons";
+import { appEnv } from "@/configs";
 
 export default class WorkspaceJoinLinkService {
   constructor(private readonly workspaceJoinLinkRepo: IWorkspaceJoinLinkRepository){}
 
-  async createLink(workspaceId: string, userId: string): Promise<WorkspaceJoinLink> {
+  async createLink(workspaceId: string, userId: string): Promise<string> {
     const token = randomBytes(24).toString("hex");
     const newLink = await this.workspaceJoinLinkRepo.createLink(token, workspaceId, userId);
     if( !newLink) {
       throw new InternalServerException("can not create link to join workspace");
     }
-    return newLink;
+    return `http://${appEnv.HOST}:${appEnv.PORT}/invite/${newLink.token}/workspace`;
   }
 
   async revokeLink(linkId: string) : Promise<void> {

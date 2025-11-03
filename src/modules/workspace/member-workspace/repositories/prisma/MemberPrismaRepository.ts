@@ -1,20 +1,40 @@
 import { prisma } from "@/configs";
 import { IMemberWorkspaceRepository } from "../interfaces/IMemberRepository";
 import { WorkspaceMember } from "@prisma/client";
+import { NotFoundException } from "@/commons/exceptions/notFound.exception";
+import { BadRequestException, ConflictException } from "@/commons";
 
 export default class MemberWorkspaceRepository implements IMemberWorkspaceRepository {
   async addMemberWorkspace(email: string, workspaceId: string): Promise<WorkspaceMember | null> {
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId }
+    });
+    if (!workspace) {
+      throw new NotFoundException('Workspace not found');
+    }
+
     const userId = await prisma.user.findUnique({
       where: { email }
     });
 
     if (!userId) return null;
 
+    const existingMember = await prisma.workspaceMember.findUnique({
+      where: {
+        userId_workspaceId: { userId: userId.id, workspaceId }
+      }
+    });
+    if (existingMember) {
+      throw new ConflictException('User is already a member of the workspace');
+    }
+
     const role = await prisma.role.findFirst({
-      where: { roleName: 'MEMBER' }
+      where: { roleName: 'MemberWorkspace' }
     });
 
-    if (!role) return null;
+    if (!role) {
+      throw new BadRequestException('Role not found');
+    }
 
     return prisma.workspaceMember.create({
       data: {
@@ -52,15 +72,11 @@ export default class MemberWorkspaceRepository implements IMemberWorkspaceReposi
     });
   }
 
-  async getEmailAndWorkspaceIdByLink(token: string): Promise<{ email: string | null; workspaceId: string | null }> {
+  async getWorkspaceIdByLink(token: string): Promise<{ workspaceId: string | null }> {
     const joinLink = await prisma.workspaceJoinLink.findUnique({
       where: { token }
     });
-    const user = await prisma.user.findUnique({
-      where: { id: joinLink?.createdById }
-    });
     return {
-      email: user?.email || null,
       workspaceId: joinLink?.workspaceId || null
     };
   }
