@@ -56,10 +56,7 @@ export class UserPrismaRepository implements IUserRepository {
         account: {
           create: { passwordHash: userData.passwordHash },
         }
-      },
-       include: {
-        account: true,
-      },
+      }
     });
   }
           

@@ -162,6 +162,7 @@ model List {
   id        String    @id @default(cuid())
   name      String
   boardId   String
+  position  Decimal   @db.Decimal(20, 10)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?

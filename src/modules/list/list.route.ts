@@ -78,9 +78,13 @@ listRegistry.registerPath({
         "application/json": {
           schema: z.object({
             name: z.string(),
+            leftId: z.string(),
+            rightId: z.string()
           }),
           example: {
             nameList: "In Progress",
+            leftIndex: "leftListId",
+            rightIndex: "rightListId",
           },
         },
       },

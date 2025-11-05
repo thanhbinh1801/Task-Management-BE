@@ -9,7 +9,9 @@ export type ListCreateRequest = z.infer<typeof ListCreateRequestSchema>;
 export const ListUpdateRequestSchema = z.object({
   listId: z.string(),
   boardId: z.string(),
-  nameList: z.string()
+  nameList: z.string(),
+  leftId: z.string().optional(),
+  rightId: z.string().optional(),
 });
 
 export type ListUpdateRequest = z.infer<typeof ListUpdateRequestSchema>;
