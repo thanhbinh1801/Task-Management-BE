@@ -2,6 +2,7 @@ import { ICardRepository } from "../interfaces/ICardRepository";
 import { prisma } from "@/configs";
 import { Card } from "@prisma/client";
 import { CardCreateRequest, CardUpdateRequest } from "../../dtos/requests/card.request";
+import { NotFoundException, ConflictException } from "@/commons";
 
 export class CardPrismaRepository implements ICardRepository {
   async findCards(listId: string): Promise<Card[]> {
@@ -40,7 +41,24 @@ export class CardPrismaRepository implements ICardRepository {
       data: {
         deletedAt: new Date(),
       }
+    })
+  }
+
+  async hardDeleteCard(cardId: string): Promise<Card> {
+    const card = await prisma.card.findUnique({
+      where: { id: cardId }
+    });
+
+    if (!card) {
+      throw new NotFoundException("Card not found");
     }
-    )
+
+    if(!card.deletedAt) {
+      throw new ConflictException("Cannot hard delete a card that is not soft deleted");
+    }
+    
+    return prisma.card.delete({
+      where: { id: cardId }
+    });
   }
 }

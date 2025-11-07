@@ -100,10 +100,19 @@ export default class CardController {
       if(!cardId) {
         throw new BadRequestException("cardId not found");
       }
-      await this.cardService.deleteCard(cardId);
+      
+      // Check if permanent delete is requested via query parameter
+      const isPermanent = req.query.permanent === 'true';
+      
+      if (isPermanent) {
+        await this.cardService.hardDeleteCard(cardId);
+      } else {
+        await this.cardService.deleteCard(cardId);
+      }
+      
       res.status(200).json({
         status: "success",
-        message: "delete card successfully",
+        message: isPermanent ? "permanently deleted card successfully" : "soft deleted card successfully",
       });
     } 
     catch(err){

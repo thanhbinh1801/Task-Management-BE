@@ -165,7 +165,7 @@ model List {
   position  Decimal   @db.Decimal(20, 10)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  deletedAt DateTime? 
 
   board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
   Card  Card[]

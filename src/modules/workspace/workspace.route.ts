@@ -18,7 +18,7 @@ workspaceRegistry.registerPath({
 });
 
 workspaceRegistry.registerPath({
-  path: '/api/v1/workspace/{id}',
+  path: '/api/v1/workspace/{workspaceId}',
   method: "get",
   tags: ["Workspace"],
   security: [{ bearerAuth: [] }],
@@ -43,7 +43,6 @@ workspaceRegistry.registerPath({
           example: {
             name: "Thanh Binh Workspace",
             visibility: WorkspaceStatusEnum.PUBLIC,
-            // userId: "cmgnmi9e90000ugtgblicw0hz"
           },
         },
       },
@@ -53,7 +52,7 @@ workspaceRegistry.registerPath({
 });
 
 workspaceRegistry.registerPath({
-  path: '/api/v1/workspace/{id}',
+  path: '/api/v1/workspace/{workspaceId}',
   method: "put",
   tags: ["Workspace"],
   security: [{ bearerAuth: [] }],
@@ -77,13 +76,16 @@ workspaceRegistry.registerPath({
 });
 
 workspaceRegistry.registerPath({
-  path: '/api/v1/workspace/{id}',
+  path: '/api/v1/workspace/{workspaceId}',
   method: "delete",
   tags: ["Workspace"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
       workspaceId: z.string()
+    }),
+    query: z.object({
+      permanent: z.enum(['true', 'false']).optional().describe('Set to "true" for hard delete, omit or "false" for soft delete')
     })
   },
   responses: createApiResponse(z.null() , "Success"),

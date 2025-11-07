@@ -44,4 +44,11 @@ export default class WorkspaceService {
       throw new InternalServerException('can not delete workspace');
     }
   }
+
+  async hardDeleteWorkspace(workspaceId: string): Promise<void> {
+    const isDelete = await this.workspaceRepo.hardDeleteWorkspace(workspaceId);
+    if (!isDelete) {
+      throw new InternalServerException('can not hard delete workspace');
+    }
+  }
 }

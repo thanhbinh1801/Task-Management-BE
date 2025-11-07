@@ -2,7 +2,7 @@ import { IListRepository } from "../interfaces/IListRepository";
 import { prisma } from "@/configs";
 import { List, Prisma } from "@prisma/client";
 import { ListCreateRequest, ListUpdateRequest } from "../../dtos/requests/list.request";
-import { NotFoundException } from "@/commons";
+import { ConflictException, NotFoundException } from "@/commons";
 
 
 export class ListPrismaRepository implements IListRepository {
@@ -110,12 +110,51 @@ export class ListPrismaRepository implements IListRepository {
   }
 
   async deleteList(listId: string): Promise<List> {
+    // Soft delete cascade: list -> cards
+    const list = await prisma.list.findUnique({
+      where: { id: listId },
+      include: {
+        Card: { where: { deletedAt: null } }
+      }
+    });
+
+    if (!list) {
+      throw new NotFoundException("List not found");
+    }
+
+    const now = new Date();
+
+    // Soft delete all cards in this list
+    const cardIds = list.Card.map(card => card.id);
+    if (cardIds.length > 0) {
+      await prisma.card.updateMany({
+        where: { id: { in: cardIds } },
+        data: { deletedAt: now }
+      });
+    }
+
+    // Soft delete list
     return prisma.list.update({
       where: { id: listId },
-      data: {
-        deletedAt: new Date(),
-      }
+      data: { deletedAt: now }
+    });
+  }
+
+  async hardDeleteList(listId: string): Promise<List> {
+    const list = await prisma.list.findUnique({
+      where: { id: listId }
+    });
+
+    if (!list) {
+      throw new NotFoundException("List not found");
     }
-    )
+
+    if(!list.deletedAt) {
+      throw new ConflictException("Cannot hard delete a list that is not soft deleted");
+    }
+    
+    return prisma.list.delete({
+      where: { id: listId }
+    });
   }
 }

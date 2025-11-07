@@ -79,10 +79,19 @@ export default class WorkspaceController {
       if(!workspaceId) {
         throw new BadRequestException(' workspace id not found');
       }
-      await this.workspaceService.deleteWorkspace(workspaceId);
+      
+      // Check if permanent delete is requested via query parameter
+      const isPermanent = req.query.permanent === 'true';
+      
+      if (isPermanent) {
+        await this.workspaceService.hardDeleteWorkspace(workspaceId);
+      } else {
+        await this.workspaceService.deleteWorkspace(workspaceId);
+      }
+      
       res.status(200).json({
         status: "success",
-        message: "update workspace successfully",
+        message: isPermanent ? "permanently deleted workspace successfully" : "soft deleted workspace successfully",
       });
     } catch (err) {
       next(err);

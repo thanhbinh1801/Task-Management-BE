@@ -7,4 +7,5 @@ export  interface ICardRepository {
   createCard(cardData: CardCreateRequest, listId: string): Promise<Card>;
   updateCard(cardData: CardUpdateRequest): Promise<Card>;
   deleteCard(cardId: string): Promise<Card>;
+  hardDeleteCard(cardId: string): Promise<Card>;
 }

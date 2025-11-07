@@ -7,4 +7,5 @@ export  interface IBoardRepository {
   createBoard(boardData: BoardCreateRequest,workspaceId: string, userId: string): Promise<Board>;
   updateBoard(boardData: BoardUpdateRequest) : Promise<Board>;
   deleteBoard(boardId: string): Promise<Board>;
+  hardDeleteBoard(boardId: string): Promise<Board>;
 }

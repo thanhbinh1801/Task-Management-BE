@@ -7,4 +7,5 @@ export interface IWorkspaceRepository {
   createWorkspace(workspaceData : WorkspaceCreateRequest, userId: string) : Promise<Workspace>;
   updateWorkspace(workspaceData: WorkspaceUpdateRequest, workspaceId: string) : Promise<Workspace>;
   deleteWorkspace(workspaceId: string) : Promise<Workspace>;
+  hardDeleteWorkspace(workspaceId: string): Promise<Workspace>;
 }

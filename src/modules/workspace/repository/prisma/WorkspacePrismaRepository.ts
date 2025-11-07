@@ -2,6 +2,7 @@ import { Workspace } from "@prisma/client";
 import { IWorkspaceRepository } from "../interfaces/IWorkspaceRepository";
 import { prisma } from "@/configs";
 import { WorkspaceCreateRequest, WorkspaceUpdateRequest } from '../../dtos/requests/workspace.request';
+import { ConflictException, NotFoundException } from "@/commons";
 
 export class WorkspacePrismaRepository implements IWorkspaceRepository {
   async findWorkspace(userId: string): Promise<Workspace[]> {
@@ -47,11 +48,99 @@ export class WorkspacePrismaRepository implements IWorkspaceRepository {
   }
 
   async  deleteWorkspace(workspaceId: string) : Promise<Workspace> {
-    return prisma.workspace.update({
-      where: { id: workspaceId},
-      data: {
-        deletedAt: new Date(),
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      include: {
+        boards: {
+          include: {
+            List: {
+              include: {
+                Card: true
+              }
+            }
+          }
+        },
+        members: true,
+        joinLinks: true
       }
-    })
+    });
+
+    if ( !workspace ) {
+      throw new NotFoundException("Workspace not found");
+    }
+
+    const now = new Date();
+
+    // Soft delete all cards in this workspace
+    const cardIds = workspace.boards.flatMap( board => board.List.flatMap( list => list.Card.map( card => card.id )));
+    if( cardIds.length > 0) {
+      await prisma.card.updateMany({
+        where: { id: { in: cardIds } },
+        data: { deletedAt: now }
+      })
+    }
+
+    const listIds = workspace.boards.flatMap( board => board.List.map( list => list.id ));
+    if( listIds.length > 0) {
+      await prisma.list.updateMany({
+        where: { id: { in: listIds } },
+        data: { deletedAt: now }
+      })
+    }
+
+    const boardIds = workspace.boards.map( board => board.id );
+    if( boardIds.length > 0) {
+      await prisma.board.updateMany({
+        where: { id: { in: boardIds } },
+        data: { deletedAt: now }
+      })
+    }
+
+    // Delete BoardMembers for all boards in this workspace
+    if (boardIds.length > 0) {
+      await prisma.boardMember.deleteMany({
+        where: { boardId: { in: boardIds } }
+      });
+    }
+
+    // Delete WorkspaceMembers
+    await prisma.workspaceMember.deleteMany({
+      where: { workspaceId: workspaceId }
+    });
+
+    // Delete WorkspaceJoinLinks
+    await prisma.workspaceJoinLink.deleteMany({
+      where: { workspaceId: workspaceId }
+    });
+
+    // Delete BoardJoinLinks for all boards in this workspace
+    if (boardIds.length > 0) {
+      await prisma.boardJoinLink.deleteMany({
+        where: { boardId: { in: boardIds } }
+      });
+    }
+
+    return prisma.workspace.update({
+      where: { id: workspaceId },
+      data: { deletedAt: now }
+    });
+  }
+
+  async hardDeleteWorkspace(workspaceId: string): Promise<Workspace> {
+    const workspace = await prisma.workspace.findUnique({
+      where: { id: workspaceId }
+    });
+
+    if (!workspace) {
+      throw new NotFoundException("Workspace not found");
+    }
+
+    if(!workspace.deletedAt) {
+      throw new ConflictException("Cannot hard delete a workspace that is not soft deleted");
+    }
+
+    return prisma.workspace.delete({
+      where: { id: workspaceId }
+    });
   }
 }

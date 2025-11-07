@@ -44,4 +44,11 @@ export class BoardService {
       throw new InternalServerException('can not delete board');
     }
   }
+
+  async hardDeleteBoard(boardId: string): Promise<void> {
+    const isDelete = await this.boardRepo.hardDeleteBoard(boardId);
+    if (!isDelete) {
+      throw new InternalServerException('can not hard delete board');
+    }
+  }
 }
