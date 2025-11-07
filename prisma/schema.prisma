@@ -100,7 +100,7 @@ model WorkspaceJoinLink {
   workspaceId String
   token       String   @unique
   expiresAt   DateTime
-  isRevoke    Boolean  @default(true)
+  isRevoke    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -148,7 +148,7 @@ model BoardJoinLink {
   boardId     String
   token       String   @unique
   expiresAt   DateTime
-  isRevoke    Boolean  @default(true)
+  isRevoke    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -162,9 +162,10 @@ model List {
   id        String    @id @default(cuid())
   name      String
   boardId   String
+  position  Decimal   @db.Decimal(20, 10)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  deletedAt DateTime? 
 
   board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
   Card  Card[]

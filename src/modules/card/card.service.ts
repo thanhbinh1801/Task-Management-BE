@@ -44,4 +44,11 @@ export class CardService {
       throw new InternalServerException('can not delete card');
     }
   }
+
+  async hardDeleteCard(cardId: string): Promise<void> {
+    const isDelete = await this.cardRepo.hardDeleteCard(cardId);
+    if (!isDelete) {
+      throw new InternalServerException('can not hard delete card');
+    }
+  }
 }

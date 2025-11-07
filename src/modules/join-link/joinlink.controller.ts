@@ -28,7 +28,11 @@ export default class JoinLinkController {
       if(!token) {
         throw new BadRequestException('not found token');
       }
-      const isJoin = await this.joinLinkService.join(token);
+      const userId = req.users?.userId;
+      if (!userId) {
+        throw new BadRequestException('not found userId');
+      }
+      const isJoin = await this.joinLinkService.join(token, userId);
       res.status(200).json({
         status: "success",
         message: "join successfully",

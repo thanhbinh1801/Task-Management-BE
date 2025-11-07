@@ -2,7 +2,7 @@ import { IBoardRepository } from "../interfaces/IBoardRepository";
 import { prisma } from "@/configs";
 import { Board } from "@prisma/client";
 import { BoardCreateRequest, BoardUpdateRequest } from "../../dtos/requests/board.request";
-import { NotFoundException } from "@/commons";
+import { ConflictException, NotFoundException } from "@/commons";
 
 
 export class BoardPrismaRepository implements IBoardRepository {
@@ -49,12 +49,80 @@ export class BoardPrismaRepository implements IBoardRepository {
   }
 
   async deleteBoard(boardId: string): Promise<Board> {
-    return prisma.board.update({
-      where: { id: boardId},
-      data: {
-        deletedAt: new Date(),
+    // Soft delete cascade: board -> lists -> cards, and delete board members
+    const board = await prisma.board.findUnique({
+      where: { id: boardId },
+      include: {
+        List: {
+          where: { deletedAt: null },
+          include: {
+            Card: { where: { deletedAt: null } }
+          }
+        }
       }
+    });
+
+    if (!board) {
+      throw new NotFoundException("Board not found");
     }
-    )
+
+    const now = new Date();
+
+    // Soft delete all cards in all lists
+    const cardIds = board.List.flatMap(list => list.Card.map(card => card.id));
+    if (cardIds.length > 0) {
+      await prisma.card.updateMany({
+        where: { id: { in: cardIds } },
+        data: { deletedAt: now }
+      });
+    }
+
+    // Soft delete all lists
+    const listIds = board.List.map(list => list.id);
+    if (listIds.length > 0) {
+      await prisma.list.updateMany({
+        where: { id: { in: listIds } },
+        data: { deletedAt: now }
+      });
+    }
+
+    // Delete all board members
+    await prisma.boardMember.deleteMany({
+      where: { boardId: boardId }
+    });
+
+    // Delete all board members 
+    await prisma.boardMember.deleteMany({
+      where: { boardId: boardId }
+    });
+
+    // Delete all board join links
+    await prisma.boardJoinLink.deleteMany({
+      where: { boardId: boardId }
+    });
+
+    // Soft delete board
+    return prisma.board.update({
+      where: { id: boardId },
+      data: { deletedAt: now }
+    });
+  }
+
+  async hardDeleteBoard(boardId: string): Promise<Board> {
+    const board = await prisma.board.findUnique({
+      where: { id: boardId }
+    });
+
+    if (!board) {
+      throw new NotFoundException("Board not found");
+    }
+
+    if(!board.deletedAt) {
+      throw new ConflictException("Cannot hard delete a board that is not soft deleted");
+    }
+
+    return prisma.board.delete({
+      where: { id: boardId }
+    });
   }
 }

@@ -81,6 +81,8 @@ export default class ListController {
       listId: listId,
       boardId: boardId,
       nameList: req.body?.nameList,
+      leftId: req.body?.leftIndex,
+      rightId: req.body?.rightIndex,
     });
 
       const updatedList = await this.listService.updateList(listData);
@@ -101,10 +103,19 @@ export default class ListController {
       if(!listId) {
         throw new BadRequestException("listId not found");
       }
-      await this.listService.deleteList(listId);
+      
+      // Check if permanent delete is requested via query parameter
+      const isPermanent = req.query.permanent === 'true';
+      
+      if (isPermanent) {
+        await this.listService.hardDeleteList(listId);
+      } else {
+        await this.listService.deleteList(listId);
+      }
+      
       res.status(200).json({
         status: "success",
-        message: "delete list successfully",
+        message: isPermanent ? "permanently deleted list successfully" : "soft deleted list successfully",
       });
     } 
     catch(err){

@@ -5,5 +5,5 @@ export interface IMemberBoardRepository {
   getMember(boardId: string): Promise<BoardMember[] | null>;
   updateMember(boardId: string, userId: string, role: string): Promise<BoardMember | null>;
   removeMember(boardId: string, userId: string): Promise<BoardMember | null>;
-  getEmailAndBoardIdByLink(token: string): Promise<{ email: string | null; boardId: string | null }>;
+  getBoardIdByLink(token: string): Promise<{boardId: string | null }>;
 }

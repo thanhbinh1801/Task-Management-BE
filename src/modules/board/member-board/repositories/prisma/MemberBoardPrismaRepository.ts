@@ -1,14 +1,32 @@
 import { prisma } from "@/configs";
 import { IMemberBoardRepository } from "../interfaces/IMemberBoardRepository";
 import { BoardMember } from "@prisma/client";
+import { ConflictException } from "@/commons/exceptions/conflict.exception";
+import { NotFoundException } from "@/commons";
 
 export default class MemberRepository implements IMemberBoardRepository {
   async addMemberBoard(email: string, boardId: string): Promise<BoardMember | null> {
+    const board = await prisma.board.findUnique({
+      where: { id: boardId }
+    });
+
+    if (!board) {
+      throw new NotFoundException('Board does not exist');
+    };
+
     const userId = await prisma.user.findUnique({
       where: { email }
     });
 
     if (!userId) return null;
+
+    const existingMember = await prisma.boardMember.findUnique({
+      where: { userId_boardId: { userId: userId.id, boardId }
+      }
+    });
+    if (existingMember) {
+      throw new ConflictException('User is already a member of the board');
+    }
 
     const role = await prisma.role.findFirst({
       where: { roleName: 'MEMBER' }
@@ -52,15 +70,11 @@ export default class MemberRepository implements IMemberBoardRepository {
     });
   }
 
-  async getEmailAndBoardIdByLink(token: string): Promise<{ email: string | null; boardId: string | null }> {
+  async getBoardIdByLink(token: string): Promise<{boardId: string | null }> {
     const joinLink = await prisma.boardJoinLink.findUnique({
       where: { token }
     });
-    const user = await prisma.user.findUnique({
-      where: { id: joinLink?.createdById }
-    });
     return {
-      email: user?.email || null,
       boardId: joinLink?.boardId || null
     };
   }

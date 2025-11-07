@@ -7,4 +7,5 @@ export  interface IListRepository {
   createList(listData: ListCreateRequest, boardId: string): Promise<List>;
   updateList(listData: ListUpdateRequest): Promise<List>;
   deleteList(listId: string): Promise<List>;
+  hardDeleteList(listId: string): Promise<List>;
 }

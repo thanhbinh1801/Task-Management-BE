@@ -78,9 +78,13 @@ listRegistry.registerPath({
         "application/json": {
           schema: z.object({
             name: z.string(),
+            leftId: z.string(),
+            rightId: z.string()
           }),
           example: {
             nameList: "In Progress",
+            leftIndex: "leftListId",
+            rightIndex: "rightListId",
           },
         },
       },
@@ -99,6 +103,9 @@ listRegistry.registerPath({
       workspaceId: z.string(),
       boardId: z.string(),
       listId: z.string(),
+    }),
+    query: z.object({
+      permanent: z.enum(['true', 'false']).optional().describe('Set to "true" for hard delete, omit or "false" for soft delete')
     })
   },
   responses: createApiResponse(z.null(), "Success"),

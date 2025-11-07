@@ -44,4 +44,11 @@ export class ListService {
       throw new InternalServerException('can not delete list');
     }
   }
+
+  async hardDeleteList(listId: string): Promise<void> {
+    const isDelete = await this.listRepo.hardDeleteList(listId);
+    if (!isDelete) {
+      throw new InternalServerException('can not hard delete list');
+    }
+  }
 }
