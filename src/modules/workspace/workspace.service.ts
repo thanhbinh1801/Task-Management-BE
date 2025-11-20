@@ -2,11 +2,12 @@ import { InternalServerException, NotFoundException } from "@/commons";
 import { IWorkspaceRepository } from "./repository/interfaces/IWorkspaceRepository";
 import { Workspace } from "@prisma/client";
 import { WorkspaceCreateRequest, WorkspaceUpdateRequest } from './dtos/requests/workspace.request';
+import { WorkspaceResponse } from './dtos/responses/workspace.response';
 
 export default class WorkspaceService {
   constructor(private readonly workspaceRepo: IWorkspaceRepository) {}
 
-  async getWorkspaces(userId: string) : Promise<Workspace[]> {
+  async getWorkspaces(userId: string) : Promise<WorkspaceResponse[]> {
     const workspaces = await this.workspaceRepo.findWorkspace(userId);
     if(workspaces.length === 0) {
       throw new NotFoundException('not found workspace');
@@ -14,7 +15,7 @@ export default class WorkspaceService {
     return workspaces;
   }
 
-  async getWorkspaceById(workspaceId: string) : Promise<Workspace | null> {
+  async getWorkspaceById(workspaceId: string) : Promise<WorkspaceResponse | null> {
     const workspace = await this.workspaceRepo.findWorkspaceById(workspaceId);
     if(!workspace) {
       throw new NotFoundException('not found workspace');

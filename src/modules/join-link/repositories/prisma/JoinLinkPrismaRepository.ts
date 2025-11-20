@@ -18,7 +18,7 @@ export default class JoinLinkPrismaRepository implements IJoinLinkRepository {
       if(wslink.expiresAt < new Date()) {
         throw new ForbiddenException('This link has expired.');
       }
-      return { scope: "WORKSPACE", link: wslink}
+      return { scope: "WORKSPACE", link: wslink, id: wslink.workspaceId}
     }
 
     const blink = await prisma.boardJoinLink.findUnique({
@@ -34,13 +34,9 @@ export default class JoinLinkPrismaRepository implements IJoinLinkRepository {
       if(blink.expiresAt < new Date()) {
         throw new ForbiddenException('This link has expired.');
       }
-      return { scope: "BOARD", link: blink};
+      return { scope: "BOARD", link: blink, id: blink.boardId};
     }
 
     return null;
   }
-
-  // async join(token: string, scope: JoinLinkScope) : Promise<boolean>{
-
-  // }
 }

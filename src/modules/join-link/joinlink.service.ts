@@ -18,16 +18,16 @@ export default class JoinLinkService {
     return validToken
   }
 
-  async join(token: string, userId: string): Promise<WorkspaceMember | BoardMember | null>{
+  async join(token: string, email: string): Promise<WorkspaceMember | BoardMember | null>{
     const validToken = await this.checkToken(token);
     if (!validToken) {
       return null;
     }
-    const { scope } = validToken;
+    const { scope, id } = validToken;
     if(scope === "WORKSPACE") {
-      return this.memberWorkspaceService.addMemberWorkspaceByLink(token, userId);
+      return this.memberWorkspaceService.addMemberWorkspaceByEmail(email, id);
     } else if (scope === "BOARD") {
-      return this.memberBoardService.addMemberBoardByLink(token, userId);
+      return this.memberBoardService.addMemberBoardByEmail(email, id);
     } else {
       return null;
     }

@@ -3,19 +3,62 @@ import { prisma } from "@/configs";
 import { List, Prisma } from "@prisma/client";
 import { ListCreateRequest, ListUpdateRequest } from "../../dtos/requests/list.request";
 import { ConflictException, NotFoundException } from "@/commons";
+import { ListResponse } from "../../dtos/responses/list.response"
 
 
 export class ListPrismaRepository implements IListRepository {
-  async findLists(boardId: string): Promise<List[]> {
-    return prisma.list.findMany({
-      where: { boardId: boardId, deletedAt: null }
+  async findLists(boardId: string): Promise<ListResponse[]> {
+    const lists = await prisma.list.findMany({
+      where: { boardId: boardId, deletedAt: null},
+      orderBy: { position: 'asc' }, 
+      include: {
+        Card: { where: { deletedAt: null }}
+      }
     });
+    return lists.map( list => ({
+      id: list.id,
+      name: list.name,
+      position: list.position.toNumber(),
+      boardId: list.boardId,
+      createAt: list.createdAt,
+      updateAt: list.updatedAt,
+      cards: list.Card.map( card => ({
+        id: card.id,
+        name: card.name,
+        isComplete: card.isComplete,
+        createAt: card.createdAt,
+        updateAt: card.updatedAt
+      }))
+    })
+
+    )
   }
 
-  async findListById(listId: string): Promise<List | null> {
-    return prisma.list.findFirst({
-      where: { id: listId, deletedAt: null }
+  async findListById(listId: string): Promise<ListResponse | null> {
+    const list = await prisma.list.findFirst({
+      where: { id: listId, deletedAt: null },
+      include: {
+        Card: { where: { deletedAt: null } }
+      }
     });
+
+    if (!list) return null;
+
+    return {
+      id: list.id,
+      name: list.name,
+      position: list.position.toNumber(),
+      boardId: list.boardId,
+      createAt: list.createdAt,
+      updateAt: list.updatedAt,
+      cards: list.Card.map(card => ({
+        id: card.id,
+        name: card.name,
+        isComplete: card.isComplete,
+        createAt: card.createdAt,
+        updateAt: card.updatedAt
+      }))
+    };
   }
 
   async createList(listData: ListCreateRequest, boardId: string): Promise<List> {

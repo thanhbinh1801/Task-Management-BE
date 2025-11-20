@@ -69,13 +69,4 @@ export default class MemberRepository implements IMemberBoardRepository {
       where: { userId_boardId: { userId, boardId } }
     });
   }
-
-  async getBoardIdByLink(token: string): Promise<{boardId: string | null }> {
-    const joinLink = await prisma.boardJoinLink.findUnique({
-      where: { token }
-    });
-    return {
-      boardId: joinLink?.boardId || null
-    };
-  }
 }

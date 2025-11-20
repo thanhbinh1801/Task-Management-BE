@@ -5,22 +5,22 @@ import JoinLinkService from "./joinlink.service";
 export default class JoinLinkController {
   constructor(private readonly joinLinkService: JoinLinkService) {}
 
-  checkToken = async (req: Request, res: Response, next: NextFunction) => {
-    try{
-      const token = req.params.token;
-      if(!token) {
-        throw new BadRequestException('not found token');
-      }
-      const isValidToken = await this.joinLinkService.checkToken(token);
-      res.status(200).json({
-        status: "success",
-        message: "token is valid",
-        data: isValidToken
-      })
-    } catch (err) {
-      next(err);
-    }
-  }
+  // checkToken = async (req: Request, res: Response, next: NextFunction) => {
+  //   try{
+  //     const token = req.params.token;
+  //     if(!token) {
+  //       throw new BadRequestException('not found token');
+  //     }
+  //     const isValidToken = await this.joinLinkService.checkToken(token);
+  //     res.status(200).json({
+  //       status: "success",
+  //       message: "token is valid",
+  //       data: isValidToken
+  //     })
+  //   } catch (err) {
+  //     next(err);
+  //   }
+  // }
 
   join = async (req: Request, res: Response, next: NextFunction) => {
     try{
@@ -28,11 +28,11 @@ export default class JoinLinkController {
       if(!token) {
         throw new BadRequestException('not found token');
       }
-      const userId = req.users?.userId;
-      if (!userId) {
-        throw new BadRequestException('not found userId');
+      const email = req.users?.email;
+      if (!email) {
+        throw new BadRequestException('not found email');
       }
-      const isJoin = await this.joinLinkService.join(token, userId);
+      const isJoin = await this.joinLinkService.join(token, email);
       res.status(200).json({
         status: "success",
         message: "join successfully",

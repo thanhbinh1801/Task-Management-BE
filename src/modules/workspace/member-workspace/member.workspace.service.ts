@@ -1,11 +1,9 @@
 import { WorkspaceMember } from "@prisma/client";
 import { IMemberWorkspaceRepository } from "./repositories/interfaces/IMemberRepository";
 import { InternalServerException } from "@/commons";
-import { IUserRepository } from "@/modules/user/repository/interface/IUserRepository";
 
 export default class MemberWorkspaceService {
   constructor(private readonly memberRepo: IMemberWorkspaceRepository
-    , private readonly userRepo: IUserRepository
   ) {}
 
   async addMemberWorkspaceByEmail(email: string, workspaceId: string): Promise<WorkspaceMember | null>{
@@ -38,17 +36,5 @@ export default class MemberWorkspaceService {
       throw new InternalServerException("can not remove member of workspace");
     }
     return removedMember;
-  }
-
-  async addMemberWorkspaceByLink(token: string, userId: string): Promise<WorkspaceMember | null> {
-    const userRecord = await this.userRepo.findById(userId);
-    if (!userRecord) {
-      throw new InternalServerException("User not found");
-    }
-    const { workspaceId } = await this.memberRepo.getWorkspaceIdByLink(token);
-    if (!workspaceId) {
-      throw new InternalServerException("can not get workspaceId from link");
-    }
-    return this.addMemberWorkspaceByEmail(userRecord.email, workspaceId);
   }
 }

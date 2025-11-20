@@ -9,7 +9,7 @@ export const LoginSchema = z.object({
 export type LoginResponse = z.infer<typeof LoginSchema>;
 
 export const RegisterSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().min(6),
   name: z.string().min(2).max(100).optional(),
   status: z.nativeEnum(UserStatusEnum).default(UserStatusEnum.ACTIVE).optional(),
