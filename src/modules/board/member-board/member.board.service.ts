@@ -1,11 +1,9 @@
 import { BoardMember } from "@prisma/client";
 import { IMemberBoardRepository } from "./repositories/interfaces/IMemberBoardRepository";
 import { InternalServerException } from "@/commons";
-import { IUserRepository } from "@/modules/user/repository/interface/IUserRepository";
 
 export default class MemberBoardService {
   constructor(private readonly memberRepo: IMemberBoardRepository
-    , private readonly userRepo: IUserRepository
   ) {}
 
   async addMemberBoardByEmail(email: string, boardId: string): Promise<BoardMember | null>{
@@ -38,14 +36,5 @@ export default class MemberBoardService {
       throw new InternalServerException("can not remove member of board");
     }
     return removedMember;
-  }
-
-  async addMemberBoardByLink(token: string, userId: string): Promise<BoardMember | null> {
-    const userRecord = await this.userRepo.findById(userId);
-    const { boardId } = await this.memberRepo.getBoardIdByLink(token);
-    if (!userRecord || !boardId) {
-      throw new InternalServerException("can not get userRecord or boardId from link");
-    }
-    return this.addMemberBoardByEmail(userRecord.email, boardId);
   }
 }

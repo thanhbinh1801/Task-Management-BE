@@ -71,13 +71,4 @@ export default class MemberWorkspaceRepository implements IMemberWorkspaceReposi
       where: { userId_workspaceId: { userId, workspaceId } }
     });
   }
-
-  async getWorkspaceIdByLink(token: string): Promise<{ workspaceId: string | null }> {
-    const joinLink = await prisma.workspaceJoinLink.findUnique({
-      where: { token }
-    });
-    return {
-      workspaceId: joinLink?.workspaceId || null
-    };
-  }
 }

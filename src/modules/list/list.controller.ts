@@ -77,6 +77,10 @@ export default class ListController {
         throw new BadRequestException("listId not found");
       }
 
+      if( ! req.body ){
+        throw new BadRequestException("data of request body not found")
+      }
+
       const listData = ListUpdateRequestSchema.parse({
       listId: listId,
       boardId: boardId,

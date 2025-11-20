@@ -4,6 +4,7 @@ export type JoinLinkScope = "WORKSPACE" | "BOARD";
 export interface JoinLinkResult {
   scope: JoinLinkScope,
   link: WorkspaceJoinLink | BoardJoinLink;
+  id: string
 }
 
 export default interface IJoinLinkRepository {

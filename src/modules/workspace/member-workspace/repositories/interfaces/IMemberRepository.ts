@@ -5,5 +5,4 @@ export interface IMemberWorkspaceRepository {
   getMember(workspaceId: string): Promise<WorkspaceMember[] | null>;
   updateMember(workspaceId: string, userId: string, role: string): Promise<WorkspaceMember | null>;
   removeMember(workspaceId: string, userId: string): Promise<WorkspaceMember | null>;
-  getWorkspaceIdByLink(token: string): Promise<{workspaceId: string | null }>;
 }

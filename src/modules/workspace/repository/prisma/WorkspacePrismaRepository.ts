@@ -3,23 +3,82 @@ import { IWorkspaceRepository } from "../interfaces/IWorkspaceRepository";
 import { prisma } from "@/configs";
 import { WorkspaceCreateRequest, WorkspaceUpdateRequest } from '../../dtos/requests/workspace.request';
 import { ConflictException, NotFoundException } from "@/commons";
+import { WorkspaceResponse } from '../../dtos/responses/workspace.response';
 
 export class WorkspacePrismaRepository implements IWorkspaceRepository {
-  async findWorkspace(userId: string): Promise<Workspace[]> {
-    return prisma.workspace.findMany({
+  async findWorkspace(userId: string): Promise<WorkspaceResponse[]> {
+    const workspaces = await prisma.workspace.findMany({
       where: { 
         deletedAt: null,
         members: {
-          some: { userId: userId}
+          some: { userId: userId }
         }
+      },
+      include: {
+        members: {
+          include: {
+            role: { select: { roleName: true } },
+            user: { select: { name: true, email: true } }
+          }
+        },
+        boards: { where: { deletedAt: null } }
       }
     });
+
+    return workspaces.map(ws => ({
+      id: ws.id,
+      name: ws.name,
+      visibility: ws.visibility,
+      createdAt: ws.createdAt,
+      updatedAt: ws.updatedAt,
+      members: ws.members.map(m => ({
+        userId: m.userId,
+        userName: m.user.name || 'Unknown',
+        userEmail: m.user.email,
+        workspaceId: m.workspaceId,
+        roleId: m.roleId,
+        roleName: m.role.roleName,
+        createdAt: m.createdAt,
+        updatedAt: m.updatedAt
+      })),
+      boards: ws.boards
+    }));
   }
 
-  async findWorkspaceById(workspaceId: string) : Promise<Workspace | null> {
-    return prisma.workspace.findUnique({
-      where: { id: workspaceId}
+  async findWorkspaceById(workspaceId: string) : Promise<WorkspaceResponse | null> {
+    const workspace = await prisma.workspace.findUnique({ 
+      where: { id: workspaceId },
+      include: {
+        members: {
+          include: {
+            role: { select: { roleName: true } },
+            user: { select: { name: true, email: true } }
+          }
+        },
+        boards: { where: { deletedAt: null } }
+      }
     });
+
+    if (!workspace) return null;
+
+    return {
+      id: workspace.id,
+      name: workspace.name,
+      visibility: workspace.visibility,
+      createdAt: workspace.createdAt,
+      updatedAt: workspace.updatedAt,
+      members: workspace.members.map(m => ({
+        userId: m.userId,
+        userName: m.user.name || 'Unknown',
+        userEmail: m.user.email,
+        workspaceId: m.workspaceId,
+        roleId: m.roleId,
+        roleName: m.role.roleName,
+        createdAt: m.createdAt,
+        updatedAt: m.updatedAt
+      })),
+      boards: workspace.boards
+    };
   }
 
   async createWorkspace(workspaceData : WorkspaceCreateRequest, userId: string) : Promise<Workspace> {

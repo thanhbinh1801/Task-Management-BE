@@ -7,18 +7,18 @@ import z from "zod";
 
 export const joinLinkRegistry = new OpenAPIRegistry();
 
-joinLinkRegistry.registerPath({
-  path: '/api/v1/invite/{token}/preview',
-  method: "get",
-  tags: ["Join-Link"],
-  security: [{ bearerAuth: [] }],
-  request: {
-    params: z.object({
-      token: z.string(),
-    })
-  },
-  responses: createApiResponse(z.null() , "Success"),
-});
+// joinLinkRegistry.registerPath({
+//   path: '/api/v1/invite/{token}/preview',
+//   method: "get",
+//   tags: ["Join-Link"],
+//   security: [{ bearerAuth: [] }],
+//   request: {
+//     params: z.object({
+//       token: z.string(),
+//     })
+//   },
+//   responses: createApiResponse(z.null() , "Success"),
+// });
 
 joinLinkRegistry.registerPath({
   path: '/api/v1/invite/{token}',
@@ -36,7 +36,7 @@ joinLinkRegistry.registerPath({
 export default function JoinLinkRouter (joinLinkController: JoinLinkController ) : Router {
   const joinLinkRouter = Router();
 
-  joinLinkRouter.get("/:token/preview", asyncHandler(authenticate()), asyncHandler(joinLinkController.checkToken));
+  // joinLinkRouter.get("/:token/preview", asyncHandler(authenticate()), asyncHandler(joinLinkController.checkToken));
   joinLinkRouter.post("/:token", asyncHandler(authenticate()), asyncHandler(joinLinkController.join));
 
   return joinLinkRouter;

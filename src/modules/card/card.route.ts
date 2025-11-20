@@ -47,6 +47,7 @@ cardRegistry.registerPath({
     params: z.object({
       workspaceId: z.string(),
       boardId: z.string(),
+      listId: z.string()
     }),
     body: {
       content: {
@@ -116,15 +117,15 @@ export function CardRouter(
   {
   const cardRouter = Router({ mergeParams: true });
 
-  cardRouter.get('/', asyncHandler(authenticate()), authorize(['VIEW_LIST'], "board"),
+  cardRouter.get('/', asyncHandler(authenticate()), authorize(['VIEW_CARD'], "board"),
                       asyncHandler(cardController.getCards));
-  cardRouter.get('/:cardId', asyncHandler(authenticate()), authorize(['VIEW_LIST'], "board"),
+  cardRouter.get('/:cardId', asyncHandler(authenticate()), authorize(['VIEW_CARD'], "board"),
                       asyncHandler(cardController.getCardById));
-  cardRouter.post('/', asyncHandler(authenticate()), authorize(['CREATE_LIST'], "board"),
+  cardRouter.post('/', asyncHandler(authenticate()), authorize(['CREATE_CARD'], "board"),
                       asyncHandler(cardController.createCard));
-  cardRouter.put('/:cardId', asyncHandler(authenticate()), authorize(['UPDATE_LIST'], "board"),
+  cardRouter.put('/:cardId', asyncHandler(authenticate()), authorize(['UPDATE_CARD'], "board"),
                       asyncHandler(cardController.updateCard));
-  cardRouter.delete('/:cardId', asyncHandler(authenticate()), authorize(['DELETE_LIST'], "board"),
+  cardRouter.delete('/:cardId', asyncHandler(authenticate()), authorize(['DELETE_CARD'], "board"),
                       asyncHandler(cardController.deleteCard));
 
   return cardRouter;
