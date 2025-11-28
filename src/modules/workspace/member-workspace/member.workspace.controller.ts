@@ -11,7 +11,7 @@ export default class MemberWorkspaceController {
       if(!workspaceId) {
         throw new BadRequestException(' workspace id not found');
       }
-      const email = req.body.email;
+      const email = req.body.emailUser;
       if(!email) {
         throw new BadRequestException(' email not found');
       }

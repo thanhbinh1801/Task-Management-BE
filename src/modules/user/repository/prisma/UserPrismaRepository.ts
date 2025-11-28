@@ -67,8 +67,17 @@ export class UserPrismaRepository implements IUserRepository {
         ...(updateData.name && { name: updateData.name } ),
         ...(updateData.email && { email: updateData.email } ),
         ...(updateData.status != null && { status: updateData.status } ),
-        ...(updateData.avatarUrl && { avatarUrl: updateData.avatarUrl } ),
         ...(updateData.emailVerifiedAt != null && { emailVerifiedAt: updateData.emailVerifiedAt})
+      }
+    });
+  }
+
+  updateAvatarUser(userId: string, avatarUrl: string, avatarPublicId: string): Promise<User | null> {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarUrl,
+        avatarPublicId
       }
     });
   }

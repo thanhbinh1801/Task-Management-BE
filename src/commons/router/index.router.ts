@@ -99,8 +99,6 @@ const initListRouter = () => {
 }
 
 const initBoardRouter = () => {
-  const userPrismaRepository = new UserPrismaRepository();
-
   const listRouter = initListRouter();
 
   const boardJoinLinkRepository = new BoardJoinLinkRepository();
@@ -109,7 +107,7 @@ const initBoardRouter = () => {
   const boardJoinLinkRouter = BoardJoinLinkRouter(boardJoinLinkController);
 
   const memberBoardRepository = new MemberBoardRepository();
-  const memberBoardService = new MemberBoardService(memberBoardRepository, userPrismaRepository);
+  const memberBoardService = new MemberBoardService(memberBoardRepository);
   const memberBoardController = new MemberBoardController(memberBoardService);
   const memberBoardRouter = MemberBoardRouter(memberBoardController);
 
@@ -122,7 +120,6 @@ const initBoardRouter = () => {
 }
 
 const initWorkspaceRouter = () => {
-  const userPrismaRepository = new UserPrismaRepository();
   const boardRouter = initBoardRouter();
   
   //workspace router dependencies
@@ -132,7 +129,7 @@ const initWorkspaceRouter = () => {
   const workspaceJoinLinkRouter = WorkspaceJoinLinkRouter(workspaceJoinLinkController);
 
   const memberWorkspaceRepository = new MemberWorkspaceRepository();
-  const memberWorkspaceService = new MemberWorkspaceService(memberWorkspaceRepository, userPrismaRepository);
+  const memberWorkspaceService = new MemberWorkspaceService(memberWorkspaceRepository);
   const memberWorkspaceController = new MemberWorkspaceController(memberWorkspaceService);
   const memberWorkspaceRouter = MemberWorkspaceRouter(memberWorkspaceController);
 
@@ -145,11 +142,10 @@ const initWorkspaceRouter = () => {
 }
 
 const initjoinLinkRouter = () => {
-  const userPrismaRepository = new UserPrismaRepository();
   const memberWorkspaceRepository = new MemberWorkspaceRepository();
-  const memberWorkspaceService = new MemberWorkspaceService(memberWorkspaceRepository, userPrismaRepository);
+  const memberWorkspaceService = new MemberWorkspaceService(memberWorkspaceRepository);
   const memberBoardRepository = new MemberBoardRepository();
-  const memberBoardService = new MemberBoardService(memberBoardRepository, userPrismaRepository);
+  const memberBoardService = new MemberBoardService(memberBoardRepository);
 
   const joinLinkRepository = new JoinLinkRepository();
   const joinLinkService = new JoinLinkService(joinLinkRepository, memberWorkspaceService, memberBoardService);
