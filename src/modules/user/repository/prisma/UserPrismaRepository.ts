@@ -83,9 +83,56 @@ export class UserPrismaRepository implements IUserRepository {
   }
 
   async createGoogleUser(userData: UserRegisterRequestGoogle): Promise<User> {
-    return prisma.user.upsert({
-      where: {email: userData.email},
-      create: {
+    // Kiểm tra user đã tồn tại chưa
+    const existingUser = await prisma.user.findUnique({
+      where: { email: userData.email },
+      include: { tokens: true }
+    });
+
+    if (existingUser) {
+      // User đã tồn tại - update thông tin và upsert token
+      await prisma.socialAccounts.upsert({
+        where: {
+          provider_providerId: {
+            provider: userData.provider,
+            providerId: userData.providerId
+          }
+        },
+        create: {
+          userId: existingUser.id,
+          provider: userData.provider,
+          providerId: userData.providerId
+        },
+        update: {}
+      });
+
+      // Upsert token thay vì create
+      await prisma.token.upsert({
+        where: { userId: existingUser.id },
+        create: {
+          userId: existingUser.id,
+          refreshToken: userData.refreshToken,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        },
+        update: {
+          refreshToken: userData.refreshToken,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        }
+      });
+
+      // Update user info nếu cần
+      return prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          ...(userData.name ? { name: userData.name } : {}),
+          ...(userData.avatarUrl ? { avatarUrl: userData.avatarUrl} : {}),
+        }
+      });
+    }
+
+    // User chưa tồn tại - tạo mới
+    return prisma.user.create({
+      data: {
         name: userData.name,
         email: userData.email,
         status: userData.status,
@@ -99,37 +146,9 @@ export class UserPrismaRepository implements IUserRepository {
         tokens: {
           create: {
             refreshToken: userData.refreshToken,
-            expiresAt: new Date(Date.now() + 7*24*60*60*1000)
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
           }
         }
-      },
-      update: {
-        ...(userData.name ? {name : userData.name} : {}),
-        ...(userData.avatarUrl ? { avatarUrl: userData.avatarUrl} : {}),
-        socialAccounts: {
-          connectOrCreate: {
-            where: {
-              provider_providerId: {
-                provider: userData.provider,
-                providerId: userData.providerId
-              },
-            },
-            create: {
-              provider: userData.provider,
-              providerId: userData.providerId,
-            },
-          },
-        },
-        tokens: {
-          create: {
-            refreshToken: userData.refreshToken,
-            expiresAt: new Date(Date.now() + 7*24*60*60*1000)
-          },
-        },
-      },
-      include: {
-        account : true,
-        socialAccounts: true
       }
     });
   }
