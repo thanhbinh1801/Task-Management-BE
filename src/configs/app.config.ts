@@ -20,4 +20,8 @@ export const appEnv = cleanEnv(process.env, {
   SMTP_PORT: num(),
   SMTP_USER: str(),
   SMTP_PASS: str(),
+  // Cloudinary
+  CLOUDINARY_NAME: str(),
+  CLOUDINARY_KEY: str(),
+  CLOUDINARY_SECRET: str(),
 });

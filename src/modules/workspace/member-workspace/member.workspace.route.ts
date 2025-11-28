@@ -12,6 +12,11 @@ memberWorkspaceRegistry.registerPath({
   method: "get",
   tags: ["Workspace-Members"],
   security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({
+      workspaceId: z.string()
+    })
+  },
   responses: createApiResponse(z.null() , "Success"),
 });
 
@@ -20,6 +25,21 @@ memberWorkspaceRegistry.registerPath({
   method: "post",
   tags: ["Workspace-Members"],
   security: [{ bearerAuth: [] }],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: z.object({ emailUser: z.email() }),
+          example: {
+            emailUser: "chauthanhbinh181@gmail.com",
+          },
+        },
+      },
+    },
+    params: z.object({
+      workspaceId: z.string()
+    })
+  },
   responses: createApiResponse(z.null() , "Success"),
 });
 
@@ -28,6 +48,11 @@ memberWorkspaceRegistry.registerPath({
   method: "put",
   tags: ["Workspace-Members"],
   security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({
+      workspaceId: z.string()
+    })
+  },
   responses: createApiResponse(z.null() , "Success"),
 });
 
@@ -36,11 +61,16 @@ memberWorkspaceRegistry.registerPath({
   method: "delete",
   tags: ["Workspace-Members"],
   security: [{ bearerAuth: [] }],
+  request: {
+    params: z.object({
+      workspaceId: z.string()
+    })
+  },
   responses: createApiResponse(z.null() , "Success"),
 });
 
 export function MemberWorkspaceRouter (memberController: MemberWorkspaceController) : Router  { 
-  const memberWorkspaceRouter = Router();
+  const memberWorkspaceRouter = Router({ mergeParams: true});
 
   memberWorkspaceRouter.post('/', asyncHandler(authenticate()), asyncHandler(authorize(['ADD_MEMBER'], "workspace")),
                         asyncHandler(memberController.addMemberWorkspaceByEmail));

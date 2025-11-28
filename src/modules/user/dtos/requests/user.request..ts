@@ -15,7 +15,7 @@ export const UserUpdateRequestSchema = z.object({
   name: z.string().optional(),
   email: z.string().optional(),
   status: z.enum(UserStatusEnum).default(UserStatusEnum.ACTIVE).optional(),
-  avatarUrl: z.string().optional(),
+  // avatarUrl: z.string().optional(),
   emailVerifiedAt: z.date().optional().transform( (val) => ( val !== undefined ? new Date() : undefined))
 });
 
@@ -25,7 +25,7 @@ export const UserRegisterRequestSchema = z.object({
   name: z.string(),
   email: z.string(),
   status: z.nativeEnum(UserStatusEnum).default(UserStatusEnum.ACTIVE),
-  avatarUrl: z.string().url().default("https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg"),
+  avatarUrl: z.string().default("https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg"),
   passwordHash: z.string()
 })
 

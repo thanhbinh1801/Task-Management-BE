@@ -6,7 +6,9 @@ import { PaginationMiddleware } from "@/commons";
 import { GetUserQuerySchema } from "./dtos/requests/user.query";
 import { createApiResponse } from "@/swagger";
 import { UserPaginationResponseSchema, UserResponseSchema } from "./dtos/responses";
-import { UserIdSchema } from "./dtos/requests";
+import { UserIdSchema, UserUpdateRequestSchema } from "./dtos/requests";
+import { upload } from "@/configs/cloudinary.config";
+import z from "zod";
 
 export const userRegistry = new OpenAPIRegistry();
 
@@ -30,6 +32,50 @@ userRegistry.registerPath({
   responses: createApiResponse(UserResponseSchema, "Get user by id successfully")
 });
 
+userRegistry.registerPath({
+  path: "/api/v1/user/{id}",
+  method: "put",
+  tags: ["User"],
+  request: {
+    params: UserIdSchema,
+    body: {
+      content: {
+        "application/json": {
+          schema: UserUpdateRequestSchema,
+          example: {
+            name: "Thanh Tung",
+            email: "thanhtung@gmail.com",
+            status: "ACTIVE"
+          },
+        }
+      }
+    }
+  },
+  responses: createApiResponse(UserResponseSchema, "Update user successfully")
+});
+
+userRegistry.registerPath({
+  path: "/api/v1/user/{id}/avatar",
+  method: "put",
+  tags: ["User"],
+  request: {
+    params: UserIdSchema,
+    body: {
+      content: {
+        "multipart/form-data": {
+          schema: z.object({
+            avatar: z.string().openapi({
+              type: "string",
+              format: "binary",
+            }),
+          }),
+        }
+      }
+    }
+  },
+  responses: createApiResponse(z.null(), "Update avatar user successfully")
+});
+
 export function UserRouter(userController: UserController): Router {
   const userRouter = Router();
 
@@ -37,6 +83,7 @@ export function UserRouter(userController: UserController): Router {
   userRouter.get('/:id', asyncHandler(userController.getUserById));
   userRouter.post('/', asyncHandler(userController.createUser));
   userRouter.put('/:id', asyncHandler(userController.updateUser));
+  userRouter.put('/:id/avatar', upload.single('avatar'), asyncHandler(userController.updateAvatarUser));
  
   return userRouter;
 }

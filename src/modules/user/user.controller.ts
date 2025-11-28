@@ -3,6 +3,10 @@ import UserService from "./user.service";
 import { BadRequestException } from "@/commons/exceptions/badRequest.exception";
 import { UserRequestSchema, UserUpdateRequestSchema, UserRegisterRequestSchema } from "./dtos/requests";
 
+type CloudinaryFile = Express.Multer.File & {
+  path: string,
+  filename: string
+}
 export default class UserController { 
   constructor(private readonly userService: UserService) {}
 
@@ -75,4 +79,28 @@ export default class UserController {
     }
   }
 
+  updateAvatarUser = async (req: Request, res: Response, next: NextFunction) => {
+    try{
+      const userId = req.params.id; 
+      if(!userId) {
+        throw new BadRequestException("user id not found");
+      }
+      const file = req.file as CloudinaryFile;
+      console.log("File avatar: ", file);
+      if( !file) {
+        throw new BadRequestException("file image not found");
+      }
+      const avatarUrl = file.path;
+      const avatarPublicId = file.filename;
+      const updateAvatarUser = await this.userService.updateAvatarUser(userId, avatarUrl, avatarPublicId);
+      res.status(200).json({
+        status: "success",
+        message: "update avatar user successfully",
+        data: updateAvatarUser
+      });
+    }
+    catch (err) {
+      next(err);
+    }
+  }
 }

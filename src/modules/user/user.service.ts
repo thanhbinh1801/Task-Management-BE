@@ -4,6 +4,7 @@ import { UserRequest, UserUpdateRequest, UserRegisterRequest, UserRegisterReques
 import { UserResponseSchema, UserManagementResponse, UserResponse } from "./dtos/responses";
 import { User } from "@prisma/client";
 import z from "zod";
+import { v2 as cloudinary } from "cloudinary";
 export default class UserService {
   constructor(private readonly userRepo: IUserRepository) {}
 
@@ -48,11 +49,34 @@ export default class UserService {
   }
 
   async updateUser(dataUser: UserUpdateRequest): Promise<User> {
+    const existingUser = await this.userRepo.findById(dataUser.id);
+    if(!existingUser) {
+      throw new NotFoundException("User not found");
+    }
+    if(existingUser.avatarPublicId) {
+      await cloudinary.uploader.destroy(existingUser.avatarPublicId);
+    }
+
     const updateUser = await this.userRepo.updateUser(dataUser);
     if(!updateUser) {
       throw new InternalServerException("Can not update user");
     }
     return updateUser;
+  }
+
+  async updateAvatarUser(userId: string, avatarUrl: string, avatarPublicId: string): Promise<User> {
+    const existingUser = await this.userRepo.findById(userId);
+    if(!existingUser) {
+      throw new NotFoundException("User not found");
+    }
+    if(existingUser.avatarPublicId) {
+      await cloudinary.uploader.destroy(existingUser.avatarPublicId);
+    }
+    const updateAvatarUser = await this.userRepo.updateAvatarUser(userId, avatarUrl, avatarPublicId);
+    if(!updateAvatarUser) {
+      throw new InternalServerException("Can not update user avatar");
+    }
+    return updateAvatarUser;
   }
 
   async getUserByEmail(email: string): Promise<User | null> {
