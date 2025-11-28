@@ -24,7 +24,7 @@ export default class JoinLinkPrismaRepository implements IJoinLinkRepository {
     const blink = await prisma.boardJoinLink.findUnique({
       where: { token: token},
       include: {
-        board: { select: { id: true, title: true}}
+        board: { select: { id: true, name: true}}
       },
     });
     if(blink){

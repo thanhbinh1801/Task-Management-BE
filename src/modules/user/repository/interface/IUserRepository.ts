@@ -6,5 +6,6 @@ export interface IUserRepository {
   findById(userId: string): Promise<User | null>;
   createUser(userData: UserRegisterRequest): Promise<User>;
   updateUser(updateData: UserUpdateRequest): Promise<User | null>;
+  updateAvatarUser(userId: string, avatarUrl: string, avatarPublicId: string): Promise<User | null>;
   createGoogleUser(userData: UserRegisterRequestGoogle): Promise<User>;
 }

@@ -18,7 +18,7 @@ export class WorkspacePrismaRepository implements IWorkspaceRepository {
         members: {
           include: {
             role: { select: { roleName: true } },
-            user: { select: { name: true, email: true } }
+            user: { select: { name: true, email: true, avatarUrl: true } }
           }
         },
         boards: { where: { deletedAt: null } }
@@ -38,10 +38,17 @@ export class WorkspacePrismaRepository implements IWorkspaceRepository {
         workspaceId: m.workspaceId,
         roleId: m.roleId,
         roleName: m.role.roleName,
+        avatarUrl: m.user.avatarUrl ?? undefined,
         createdAt: m.createdAt,
         updatedAt: m.updatedAt
       })),
-      boards: ws.boards
+      boards: ws.boards.map(board => ({
+        id: board.id,
+        name: board.name,
+        workspaceId: board.workspaceId,
+        createdAt: board.createdAt,
+        updatedAt: board.updatedAt
+      }))
     }));
   }
 
@@ -52,7 +59,7 @@ export class WorkspacePrismaRepository implements IWorkspaceRepository {
         members: {
           include: {
             role: { select: { roleName: true } },
-            user: { select: { name: true, email: true } }
+            user: { select: { name: true, email: true, avatarUrl: true } }
           }
         },
         boards: { where: { deletedAt: null } }
@@ -74,6 +81,7 @@ export class WorkspacePrismaRepository implements IWorkspaceRepository {
         workspaceId: m.workspaceId,
         roleId: m.roleId,
         roleName: m.role.roleName,
+        avatarUrl: m.user.avatarUrl ?? undefined,
         createdAt: m.createdAt,
         updatedAt: m.updatedAt
       })),

@@ -14,6 +14,8 @@ export const UserResponseSchema = z.object({
   name: z.string(),
   email: z.string().email(),
   status: z.nativeEnum(UserStatusEnum).default(UserStatusEnum.ACTIVE),
+  avatarUrl: z.string().optional(),
+  avatarPublicId: z.string().nullable().optional(),
 });
 
 export type UserManagementResponse = z.infer<typeof UserResponseSchema>

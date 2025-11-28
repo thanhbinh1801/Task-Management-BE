@@ -3,19 +3,103 @@ import { prisma } from "@/configs";
 import { Board } from "@prisma/client";
 import { BoardCreateRequest, BoardUpdateRequest } from "../../dtos/requests/board.request";
 import { ConflictException, NotFoundException } from "@/commons";
+import { BoardResponse } from "../../dtos/responses/board.response";
 
 
 export class BoardPrismaRepository implements IBoardRepository {
-  async findBoards(workspaceId: string): Promise<Board[]> {
-    return prisma.board.findMany({
-      where: {workspaceId: workspaceId, deletedAt: null}
+  async findBoards(workspaceId: string): Promise<BoardResponse[]> {
+    const boards = await prisma.board.findMany({
+      where: {workspaceId: workspaceId, deletedAt: null},
+      include: {
+        members: {
+          include: {
+            role: { select: { roleName: true } },
+            user: { select: { name: true, email: true, avatarUrl: true } }
+          }
+        },
+        List: {
+          where: { deletedAt: null },
+          include: {
+            Card: { where: { deletedAt: null } }
+          }
+        }
+      }
     });
+    return boards.map( board => ({
+      id: board.id,
+      name: board.name,
+      workspaceId: board.workspaceId,
+      members: board.members.map(m => ({
+        userId: m.userId,
+        userName: m.user.name || 'Unknown',
+        userEmail: m.user.email,
+        boardId: m.boardId,
+        roleId: m.roleId,
+        roleName: m.role.roleName,
+        avatarUrl: m.user.avatarUrl ?? undefined,
+        createdAt: m.createdAt,
+        updatedAt: m.updatedAt
+      })),
+      lists: board.List.map(list => ({
+        id: list.id,
+        name: list.name,
+        boardId: list.boardId,
+        position: list.position.toNumber(),
+        cards: list.Card.map(card => ({
+          id: card.id,
+          name: card.name,
+          isComplete: card.isComplete
+        }))
+      }))
+    }));
   }
 
-  async findBoardById(boardId: string): Promise<Board | null> {
-    return prisma.board.findFirst({
-      where: { id: boardId}
+  async findBoardById(boardId: string): Promise<BoardResponse | null> {
+    const board = await prisma.board.findUnique({
+      where: { id: boardId },
+      include: {
+        members: {
+          include: {
+            role: { select: { roleName: true } },
+            user: { select: { name: true, email: true, avatarUrl: true } }
+          }
+        },
+        List: {
+          where: { deletedAt: null },
+          include: {
+            Card: { where: { deletedAt: null } }
+          }
+        }
+      }
     });
+    if (!board) return null;
+    return {
+      id: board.id,
+      name: board.name,
+      workspaceId: board.workspaceId,
+      members: board.members.map(m => ({
+        userId: m.userId,
+        userName: m.user.name || 'Unknown',
+        userEmail: m.user.email,
+        boardId: m.boardId,
+        roleId: m.roleId,
+        roleName: m.role.roleName,
+        avatarUrl: m.user.avatarUrl ?? undefined,
+        createdAt: m.createdAt,
+        updatedAt: m.updatedAt
+      })),
+      lists: board.List.map(list => ({
+        id: list.id,
+        name: list.name,
+        boardId: list.boardId,
+        position: list.position.toNumber(),
+        cards: list.Card.map(card => ({
+          id: card.id,
+          name: card.name,
+          isComplete: card.isComplete
+        }))
+      }))
+    }
   }
 
   async createBoard(boardData: BoardCreateRequest, workspaceId: string, userId: string): Promise<Board>{ 
@@ -27,7 +111,7 @@ export class BoardPrismaRepository implements IBoardRepository {
     }
     return prisma.board.create({
       data: {
-        title: boardData.nameBoard,
+        name: boardData.nameBoard,
         workspaceId: workspaceId,
         members: {
           create: {
@@ -43,7 +127,7 @@ export class BoardPrismaRepository implements IBoardRepository {
     return prisma.board.update({
       where: { id: boardData.boardId },
       data: {
-        ...( boardData.nameBoard && { title: boardData.nameBoard }),
+        ...( boardData.nameBoard && { name: boardData.nameBoard }),
       },
     });
   }
