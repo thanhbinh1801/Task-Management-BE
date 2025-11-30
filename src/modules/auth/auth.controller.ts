@@ -35,20 +35,24 @@ export default class AuthController {
 
   refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { refreshToken } = req.body;
-      const newTokens = await this.authService.refreshToken(refreshToken);
-      res.cookie("accessToken", newTokens.accessToken, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 15 * 60 * 1000 // 15 minutes
-      });
+      // Lấy refreshToken từ cookie thay vì body
+      const { refreshToken } = req.cookies;
       
-      res.cookie(" refreshToken", newTokens.refreshToken, {
+      if (!refreshToken) {
+        return res.status(401).json({ message: "No refresh token provided" });
+      }
+      
+      const newTokens = await this.authService.refreshToken(refreshToken);
+      
+      // Cập nhật refreshToken mới vào cookie
+      res.cookie("refreshToken", newTokens.refreshToken, {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
       });
-      res.json(newTokens);
+      
+      res.json({ accessToken: newTokens.accessToken });
     } catch (exception) {
       next(exception);
     }
@@ -142,15 +146,16 @@ export default class AuthController {
       if(!user) return res.redirect('/api/v1/auth/login-failed');
       try{
         const result = await this.authService.processGoogleLogin(user);
+        
+        // Lưu refreshToken vào cookie
         res.cookie("refreshToken", result?.refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
-          maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+          maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
-        // Redirect về dashboard với accessToken trong URL để frontend lưu vào localStorage
-        return res.redirect(`${process.env.CORS_ORIGIN}/dashboard`);
+        return res.redirect(`${process.env.CORS_ORIGIN}/oauth/callback#token=${result?.accessToken}`);
       }
       catch(exception){
         next(exception);
