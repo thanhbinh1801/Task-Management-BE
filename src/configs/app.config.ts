@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { cleanEnv, host, num, port, str, testOnly, url } from 'envalid';
+import { cleanEnv, host, num, port, str, testOnly } from 'envalid';
 
 dotenv.config();
 
@@ -24,4 +24,7 @@ export const appEnv = cleanEnv(process.env, {
   CLOUDINARY_NAME: str(),
   CLOUDINARY_KEY: str(),
   CLOUDINARY_SECRET: str(),
+  // Redis
+  REDIS_HOST: str({ devDefault: testOnly('localhost') }),
+  REDIS_PORT: port({ devDefault: testOnly(6379) }),
 });
