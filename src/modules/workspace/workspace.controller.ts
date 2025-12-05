@@ -82,11 +82,15 @@ export default class WorkspaceController {
       
       // Check if permanent delete is requested via query parameter
       const isPermanent = req.query.permanent === 'true';
+      const userId = req.users?.userId as string;
+      if(!userId) {
+        throw new BadRequestException(' user id not found');
+      }
       
       if (isPermanent) {
-        await this.workspaceService.hardDeleteWorkspace(workspaceId);
+        await this.workspaceService.hardDeleteWorkspace(workspaceId, userId);
       } else {
-        await this.workspaceService.deleteWorkspace(workspaceId);
+        await this.workspaceService.deleteWorkspace(workspaceId, userId);
       }
       
       res.status(200).json({

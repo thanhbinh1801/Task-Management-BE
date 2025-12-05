@@ -1,6 +1,7 @@
 import { BoardMember } from "@prisma/client";
 import { IMemberBoardRepository } from "./repositories/interfaces/IMemberBoardRepository";
 import { InternalServerException } from "@/commons";
+import { clearRbacBoardCache } from "@/commons/utils/rbacCache";
 
 export default class MemberBoardService {
   constructor(private readonly memberRepo: IMemberBoardRepository
@@ -27,6 +28,7 @@ export default class MemberBoardService {
     if(!updatedMember) {
       throw new InternalServerException("can not update member of board");
     }
+    await clearRbacBoardCache(boardId, userId);
     return updatedMember;
   }
 
@@ -35,6 +37,7 @@ export default class MemberBoardService {
     if(!removedMember) {
       throw new InternalServerException("can not remove member of board");
     }
+    await clearRbacBoardCache(boardId, userId);
     return removedMember;
   }
 }

@@ -105,11 +105,15 @@ export default class BoardController {
       
       // Check if permanent delete is requested via query parameter
       const isPermanent = req.query.permanent === 'true';
+      const userId = req.users?.userId;
+      if(!userId) {
+        throw new BadRequestException("userId not found");
+      }
       
       if (isPermanent) {
-        await this.boardService.hardDeleteBoard(boardId);
+        await this.boardService.hardDeleteBoard(boardId, userId);
       } else {
-        await this.boardService.deleteBoard(boardId);
+        await this.boardService.deleteBoard(boardId, userId);
       }
       
       res.status(200).json({

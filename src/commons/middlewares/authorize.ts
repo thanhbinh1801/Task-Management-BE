@@ -1,6 +1,7 @@
 import { prisma } from "@/configs";
 import { Request, Response, NextFunction } from "express";
 import { BadRequestException } from "../exceptions";
+import { redis } from "@/configs/redis.config";
 
 type Scope = "workspace" | "board" | "global";
 
@@ -12,7 +13,7 @@ export const authorize = (requiredPermissions: string[], scope: Scope) => {
         return res.status(401).json({message: "Unauthorized error"});
       }
       if (scope === "global") {
-        // TODO: nếu bạn có RBAC global thì kiểm tra ở đây; 
+        // TODO: nếu có RBAC global thì kiểm tra ở đây; 
         return next();
       }
 
@@ -22,9 +23,35 @@ export const authorize = (requiredPermissions: string[], scope: Scope) => {
       const boardId = req.params.boardId;
       console.log("boardId: ", boardId);
 
-      if(!workspaceId) {
-        throw new BadRequestException("khong co id trong param")
+      if (!workspaceId && scope === "workspace") {
+        throw new BadRequestException("Missing workspaceId in params");
       }
+
+      if (!boardId && scope === "board") {
+        throw new BadRequestException("Missing boardId in params");
+      }
+
+      // create cache key
+      const cacheKey = scope === "workspace" ? 'workspace_permissions_' + workspaceId + '_' + userId 
+                                            : 'board_permissions_' + boardId + '_' + userId; 
+
+      // check cache
+      const cachePermissions = await redis.get(cacheKey);
+
+      if(cachePermissions){
+        const data = JSON.parse(cachePermissions) as string[];
+        const permissionSet = new Set(data);
+
+        console.log('[authorize - cache] required:', requiredPermissions);
+        console.log('[authorize - cache] userPerms:', Array.from(permissionSet));
+
+        const isPermitted = requiredPermissions.every( p => permissionSet.has(p));
+        if( !isPermitted) return res.status(403).json({ message: "Forbidden: missing permission" });
+
+        return next();
+      }
+      
+      // cache miss -> fetch data from DB
 
       let membership;
       if( scope == "workspace"){
@@ -66,6 +93,9 @@ export const authorize = (requiredPermissions: string[], scope: Scope) => {
       console.log('[authorize] required:', requiredPermissions);
       console.log('[authorize] userPerms:', Array.from(permissionSet));
 
+      // cache the permissions
+      const ttl = 300; // cache for 5 minutes
+      await redis.set( cacheKey, JSON.stringify(Array.from(permissionSet)), 'EX', ttl);
 
       const isPermitted = requiredPermissions.every( p => permissionSet.has(p)); 
       if( !isPermitted) return res.status(403).json({ message: "Forbidden: missing permission" });
