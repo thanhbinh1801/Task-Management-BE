@@ -1,6 +1,7 @@
 import { WorkspaceMember } from "@prisma/client";
 import { IMemberWorkspaceRepository } from "./repositories/interfaces/IMemberRepository";
 import { InternalServerException } from "@/commons";
+import { clearRbacWorkspaceCache } from "@/commons/utils/rbacCache";
 
 export default class MemberWorkspaceService {
   constructor(private readonly memberRepo: IMemberWorkspaceRepository
@@ -27,6 +28,7 @@ export default class MemberWorkspaceService {
     if(!updatedMember) {
       throw new InternalServerException("can not update member of workspace");
     }
+    await clearRbacWorkspaceCache(workspaceId, userId);
     return updatedMember;
   }
 
@@ -35,6 +37,7 @@ export default class MemberWorkspaceService {
     if(!removedMember) {
       throw new InternalServerException("can not remove member of workspace");
     }
+    await clearRbacWorkspaceCache(workspaceId, userId);
     return removedMember;
   }
 }

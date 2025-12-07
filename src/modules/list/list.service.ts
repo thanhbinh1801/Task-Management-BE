@@ -2,11 +2,12 @@ import { InternalServerException, NotFoundException } from "@/commons";
 import { IListRepository } from "./repository/interfaces/IListRepository";
 import { List } from "@prisma/client";
 import { ListCreateRequest, ListUpdateRequest } from "./dtos/requests/list.request";
+import { ListResponse } from "./dtos/responses/list.response";
 
 export class ListService {
   constructor( private readonly listRepo: IListRepository){}
 
-  async getLists(boardId: string): Promise<List[]> {
+  async getLists(boardId: string): Promise<ListResponse[]> {
     const lists = await this.listRepo.findLists(boardId);
     if(lists.length === 0) {
       throw new NotFoundException("Lists not found");
@@ -14,7 +15,7 @@ export class ListService {
     return lists;
   } 
 
-  async getListById(listId: string): Promise<List | null> {
+  async getListById(listId: string): Promise<ListResponse | null> {
     const list = await this.listRepo.findListById(listId);
     if(!list) {
       throw new NotFoundException("List not found");

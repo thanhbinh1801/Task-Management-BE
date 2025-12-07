@@ -39,7 +39,7 @@ Server sẽ chạy ở địa chỉ: [http://localhost:8000](http://localhost:80
 
 ## API Docs
 
-- Truy cập Swagger tại: [http://localhost:8000/api/docs](http://localhost:8000/api/docs)
+- Truy cập Swagger tại: [http://localhost:8000/api-docs](http://localhost:8000/api-docs)
 
 ---
 
@@ -50,6 +50,12 @@ yarn test
 ```
 
 ---
+
+## Thao tác với redis trong docker
+
+```bash
+docker exec -it redis_container redis-cli
+```
 
 ## Ghi chú
 

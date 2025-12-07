@@ -1,7 +1,7 @@
-import { INotificationRepository } from "./repository/interfaces/IWorkspaceRepository";
+// import { INotificationRepository } from "./repository/interfaces/IWorkspaceRepository";
 
-export default class NotificationService {
-  constructor(private readonly notificationRepo: INotificationRepository) {}
+// export default class NotificationService {
+//   constructor(private readonly notificationRepo: INotificationRepository) {}
 
  
-}
+// }

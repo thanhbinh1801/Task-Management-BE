@@ -3,6 +3,8 @@ import { IBoardRepository } from "./repository/interfaces/IBoardRepository";
 import { ITemplateRepository } from "@/modules/board-template/interfaces/ITemplateRepository";
 import { Board } from "@prisma/client";
 import { BoardCreateRequest, BoardUpdateRequest } from "./dtos/requests/board.request";
+import { BoardResponse } from "./dtos/responses/board.response";
+import { clearRbacBoardCache } from "@/commons/utils/rbacCache";
 
 export class BoardService {
   constructor(
@@ -10,7 +12,7 @@ export class BoardService {
     private readonly templateRepo: ITemplateRepository  
   ) {}
 
-  async getBoards(workspaceId: string): Promise<Board[]> {
+  async getBoards(workspaceId: string): Promise<BoardResponse[]> {
     const boards = await this.boardRepo.findBoards(workspaceId);
     if(boards.length === 0) {
       throw new NotFoundException("Boards not found");
@@ -18,7 +20,7 @@ export class BoardService {
     return boards;
   } 
 
-  async getBoardById(boardId: string): Promise<Board | null> {
+  async getBoardById(boardId: string): Promise<BoardResponse | null> {
     const board = await this.boardRepo.findBoardById(boardId);
     if(!board) {
       throw new NotFoundException("Board not found");
@@ -64,17 +66,19 @@ export class BoardService {
     return updateBoard;
   }
 
-  async deleteBoard(boarId: string): Promise<void> {
+  async deleteBoard(boarId: string, userId: string): Promise<void> {
     const isDelete = await this.boardRepo.deleteBoard(boarId);
     if(!isDelete) {
       throw new InternalServerException('can not delete board');
     }
+    await clearRbacBoardCache(boarId, userId);
   }
 
-  async hardDeleteBoard(boardId: string): Promise<void> {
+  async hardDeleteBoard(boardId: string, userId: string): Promise<void> {
     const isDelete = await this.boardRepo.hardDeleteBoard(boardId);
     if (!isDelete) {
       throw new InternalServerException('can not hard delete board');
     }
+    await clearRbacBoardCache(boardId, userId);
   }
 }
