@@ -113,17 +113,23 @@ model WorkspaceJoinLink {
 model Board {
   id          String    @id @default(cuid())
   name        String
-  workspaceId String
+  workspaceId String?
+
+  isTemplate  Boolean @default(false)
+  category    String?
+  description String?
+
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
-  workspace Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   members   BoardMember[]
   joinLinks BoardJoinLink[]
   List      List[]
 
   @@index([workspaceId])
+  @@index([isTemplate])
 }
 
 model BoardMember {
@@ -244,3 +250,4 @@ model Otp {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+

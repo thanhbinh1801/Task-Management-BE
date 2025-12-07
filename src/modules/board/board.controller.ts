@@ -53,8 +53,8 @@ export default class BoardController {
         throw new BadRequestException("userId not found");
       }
 
-      const { nameBoard } = BoardCreateRequestSchema.parse(req.body);
-      const boardData = { nameBoard }
+      const { nameBoard, templateId } = BoardCreateRequestSchema.parse(req.body);
+      const boardData = { nameBoard, templateId };
       const newBoard = await this.boardService.createBoard(boardData, workspaceId, userId);
       res.status(201).json({
         status: "success",

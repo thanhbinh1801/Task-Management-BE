@@ -14,10 +14,16 @@ import { WorkspaceRouter } from "@/modules/workspace/workspace.route";
 import WorkspaceController from "@/modules/workspace/workspace.controller";
 import WorkspaceService from "@/modules/workspace/workspace.service";
 import { WorkspacePrismaRepository } from "@/modules/workspace/repository/prisma/WorkspacePrismaRepository";
+
 import { BoardPrismaRepository } from "@/modules/board/repository/prisma/BoardPrismaRepository";
 import { BoardService } from "@/modules/board/board.service";
 import BoardController from "@/modules/board/board.controller";
 import { BoardRouter } from "@/modules/board/board.route";
+
+import { TemplatePrismaRepository } from "@/modules/board-template/repository/TemplatePrismaRepository";
+import { TemplateService } from "@/modules/board-template/boardTemplate.service";
+import TemplateController from "@/modules/board-template/boardTemplate.controller";
+import { TemplateRouter } from "@/modules/board-template/boardTempalte.router";
 
 import WorkspaceJoinLinkRepository from "@/modules/workspace/workspace-join-link/repository/prisma/WorkspaceJoinLinkPrismaRepository";
 import WorkspaceJoinLinkService from "@/modules/workspace/workspace-join-link/workspaceJoinLink.service";
@@ -111,12 +117,21 @@ const initBoardRouter = () => {
   const memberBoardController = new MemberBoardController(memberBoardService);
   const memberBoardRouter = MemberBoardRouter(memberBoardController);
 
+  const templateRepository = new TemplatePrismaRepository();
   const boardRepository = new BoardPrismaRepository();
-  const boardService = new BoardService(boardRepository);
+  const boardService = new BoardService(boardRepository, templateRepository);
   const boardController = new BoardController(boardService);
   const boardRouter = BoardRouter(boardController, memberBoardRouter, boardJoinLinkRouter, listRouter);
 
   return boardRouter;
+}
+
+const initTemplateRouter = () => {
+  const templateRepository = new TemplatePrismaRepository();
+  const templateService = new TemplateService(templateRepository);
+  const templateController = new TemplateController(templateService);
+
+  mainRouter.use("/templates", TemplateRouter(templateController));
 }
 
 const initWorkspaceRouter = () => {
@@ -155,6 +170,7 @@ const initjoinLinkRouter = () => {
 
 initAuthRouter();
 initUserRouter();
+initTemplateRouter();
 initWorkspaceRouter();
 initjoinLinkRouter();
 export default mainRouter;

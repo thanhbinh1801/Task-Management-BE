@@ -2,6 +2,7 @@ import z from "zod"
 
 export const BoardCreateRequestSchema = z.object({
   nameBoard: z.string(),
+  templateId: z.string().optional()
 });
 
 export type BoardCreateRequest = z.infer<typeof BoardCreateRequestSchema>;
