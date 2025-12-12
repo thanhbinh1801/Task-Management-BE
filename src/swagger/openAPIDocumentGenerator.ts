@@ -15,13 +15,14 @@ import { cardRegistry } from "@/modules/card/card.route";
 import { joinLinkRegistry } from "@/modules/join-link/joinlink.route";
 
 import { OpenApiGeneratorV3, OpenAPIRegistry } from "@asteasolutions/zod-to-openapi";
+import { templateRegistry } from "@/modules/board-template/boardTempalte.router"; 
 
 export function generateOpenAPIDocument() {
     const registry = new OpenAPIRegistry(
         [authRegistry, healthCheckRegistry, userRegistry, 
         workspaceRegistry, workspaceJoinLinkRegistry, memberWorkspaceRegistry, 
         boardRegistry, boardJoinLinkRegistry, memberBoardRegistry,
-        listRegistry, cardRegistry, joinLinkRegistry]
+        listRegistry, cardRegistry, joinLinkRegistry, templateRegistry]
     );
     const generator = new OpenApiGeneratorV3(registry.definitions)
 

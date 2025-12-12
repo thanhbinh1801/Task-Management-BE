@@ -1,4 +1,4 @@
-    import { prisma } from "../configs/prisma";
+import { prisma } from "../configs/prisma";
 
     async function main(){
       await prisma.permission.createMany({
@@ -136,6 +136,140 @@
       }
 
       console.log('RBAC seed completed successfully!');
+
+      console.log('Starting system templates seed...');
+
+      const educationTemplate = await prisma.board.upsert({
+        where: { id: 'system-template-education' },
+        update: {},
+        create: {
+          id: 'system-template-education',
+          name: 'Giáo dục',
+          workspaceId: null,        
+          isTemplate: true,
+          category: 'EDUCATION',
+          description: 'Template quản lý bài tập, tài liệu học tập',
+          List: {
+            create: [
+              {
+                name: 'Resources',
+                position: 1,
+                Card: {
+                  create: [
+                    { name: 'Getting started with Trello' },
+                    { name: 'Ways to contact Dr. Theisen Remotely' },
+                    { name: 'Coping with Covid-19' },
+                    { name: 'Remote Class Plan and Revised Schedule' },
+                    { name: 'Links to eTextbook - Biochemistry' }
+                  ]
+                }
+              },
+              {
+                name: 'Weekly Assignments',
+                position: 2,
+                Card: {
+                  create: [
+                    { name: 'Week of 3/23-3/29' },
+                    { name: 'Week of 3/30-4/5' },
+                    { name: 'Week of 4/6-12' },
+                    { name: 'Week of 4/13-19' },
+                    { name: 'Week of 4/20-26' },
+                    { name: 'Week of 4/27-5/3' }
+                  ]
+                }
+              },
+              {
+                name: 'Lab Projects',
+                position: 3,
+                Card: {
+                  create: [
+                    { name: 'Poster - Both Tracks' },
+                    { name: 'Final Lab Report - Catalase Track' },
+                    { name: 'Final Lab Report - Hexokinase Track' }
+                  ]
+                }
+              },
+              {
+                name: 'Exams',
+                position: 4,
+                Card: {
+                  create: [
+                    { name: 'Exam 2: Ch. 5-8' },
+                    { name: 'Exam 3: Ch. 10-12, 15-16, and 18-21' },
+                    { name: 'Optional Retake (Finals Week)' }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      });
+
+      const businessTemplate = await prisma.board.upsert({
+        where: { id: 'system-template-business' },
+        update: {},
+        create: {
+          id: 'system-template-business',
+          name: 'Business - CRM Pipeline',
+          workspaceId: null,
+          isTemplate: true,
+          category: 'BUSINESS',
+          description: 'Quản lý pipeline bán hàng và quan hệ khách hàng',
+          List: {
+            create: [
+              { name: 'Leads', position: 1 },
+              { name: 'Qualified', position: 2 },
+              { name: 'Proposal Sent', position: 3 },
+              { name: 'Closed Won', position: 4 }
+            ]
+          }
+        }
+      });
+
+      const kanbanTemplate = await prisma.board.upsert({
+        where: { id: 'system-template-kanban' },
+        update: {},
+        create: {
+          id: 'system-template-kanban',
+          name: 'Kanban - Quản lý dự án',
+          workspaceId: null,
+          isTemplate: true,
+          category: 'PROJECT_MANAGEMENT',
+          description: 'Template Kanban cơ bản cho quản lý công việc',
+          List: {
+            create: [
+              { name: 'Backlog', position: 1 },
+              { name: 'To Do', position: 2 },
+              { name: 'In Progress', position: 3 },
+              { name: 'Review', position: 4 },
+              { name: 'Done', position: 5 }
+            ]
+          }
+        }
+      });
+
+      const marketingTemplate = await prisma.board.upsert({
+        where: { id: 'system-template-marketing' },
+        update: {},
+        create: {
+          id: 'system-template-marketing',
+          name: 'Marketing Campaign',
+          workspaceId: null,
+          isTemplate: true,
+          category: 'MARKETING',
+          description: 'Quản lý chiến dịch marketing',
+          List: {
+            create: [
+              { name: 'Ideas', position: 1 },
+              { name: 'Planning', position: 2 },
+              { name: 'In Progress', position: 3 },
+              { name: 'Published', position: 4 }
+            ]
+          }
+        }
+      });
+
+      console.log('System templates seeded successfully!');
     }
 
     main()

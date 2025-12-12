@@ -9,7 +9,7 @@ import { BoardResponse } from "../../dtos/responses/board.response";
 export class BoardPrismaRepository implements IBoardRepository {
   async findBoards(workspaceId: string): Promise<BoardResponse[]> {
     const boards = await prisma.board.findMany({
-      where: {workspaceId: workspaceId, deletedAt: null},
+      where: {workspaceId: workspaceId, deletedAt: null, isTemplate: false},
       include: {
         members: {
           include: {
@@ -56,7 +56,7 @@ export class BoardPrismaRepository implements IBoardRepository {
 
   async findBoardById(boardId: string): Promise<BoardResponse | null> {
     const board = await prisma.board.findUnique({
-      where: { id: boardId },
+      where: { id: boardId, isTemplate: false },
       include: {
         members: {
           include: {
