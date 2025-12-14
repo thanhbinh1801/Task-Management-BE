@@ -28,7 +28,10 @@ export class BoardPrismaRepository implements IBoardRepository {
     return boards.map( board => ({
       id: board.id,
       name: board.name,
-      workspaceId: board.workspaceId,
+      workspaceId: board.workspaceId  ?? null,
+      isTemplate: board.isTemplate,
+      category: board.category ?? null,
+      description: board.description ?? null,
       members: board.members.map(m => ({
         userId: m.userId,
         userName: m.user.name || 'Unknown',
@@ -76,7 +79,10 @@ export class BoardPrismaRepository implements IBoardRepository {
     return {
       id: board.id,
       name: board.name,
-      workspaceId: board.workspaceId,
+      workspaceId: board.workspaceId ?? null,
+      isTemplate: board.isTemplate,
+      category: board.category ?? null,
+      description: board.description ?? null,
       members: board.members.map(m => ({
         userId: m.userId,
         userName: m.user.name || 'Unknown',

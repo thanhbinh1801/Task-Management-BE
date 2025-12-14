@@ -27,7 +27,10 @@ export interface ListResponse {
 export interface BoardResponse {
   id: string;
   name: string;
-  workspaceId: string;
+  workspaceId?: string | null;
+  isTemplate: boolean;
+  category?: string | null;
+  description?: string | null;
   lists: ListResponse[];
   members: BoardMemberResponse[];
 }

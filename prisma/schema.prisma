@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,27 +7,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserStatusEnum {
-  ACTIVE
-  LOCKED
-}
-
-enum WorkspaceStatusEnum {
-  PUBLIC
-  PRIVATE
-}
-
 model Role {
-  id          String    @id @default(cuid())
-  roleName    String    @unique
-  description String?
-  createAt    DateTime  @default(now())
-  deleteAt    DateTime?
-
-  workspaceMembers WorkspaceMember[]
+  id               String            @id @default(cuid())
+  roleName         String            @unique
+  description      String?
+  createAt         DateTime          @default(now())
+  deleteAt         DateTime?
   boardMembers     BoardMember[]
   RolePermission   RolePermission[]
   UserRole         UserRole[]
+  workspaceMembers WorkspaceMember[]
 }
 
 model Permission {
@@ -46,9 +29,8 @@ model Permission {
 model RolePermission {
   roleId       String
   permissionId String
-
-  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([roleId, permissionId])
   @@index([permissionId])
@@ -57,9 +39,8 @@ model RolePermission {
 model UserRole {
   userId String
   roleId String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, roleId])
   @@index([roleId])
@@ -72,61 +53,55 @@ model Workspace {
   createdAt  DateTime            @default(now())
   updatedAt  DateTime            @updatedAt
   deletedAt  DateTime?
-
-  boards    Board[]
-  members   WorkspaceMember[]
-  joinLinks WorkspaceJoinLink[]
+  boards     Board[]
+  joinLinks  WorkspaceJoinLink[]
+  members    WorkspaceMember[]
 }
 
 model WorkspaceMember {
   userId      String
   workspaceId String
   roleId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  role        Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  role      Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, workspaceId]) // 1 role / workspace
+  @@id([userId, workspaceId])
   @@index([roleId])
   @@index([workspaceId])
 }
 
 model WorkspaceJoinLink {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   createdById String
   workspaceId String
-  token       String   @unique
+  token       String    @unique
   expiresAt   DateTime
-  isRevoke    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  createdBy User      @relation(fields: [createdById], references: [id])
+  isRevoke    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
 }
 
 model Board {
-  id          String    @id @default(cuid())
+  id          String          @id @default(cuid())
   name        String
   workspaceId String?
-
-  isTemplate  Boolean @default(false)
+  isTemplate  Boolean         @default(false)
   category    String?
   description String?
-
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
   deletedAt   DateTime?
-
-  workspace Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  members   BoardMember[]
-  joinLinks BoardJoinLink[]
-  List      List[]
+  workspace   Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  joinLinks   BoardJoinLink[]
+  members     BoardMember[]
+  List        List[]
 
   @@index([workspaceId])
   @@index([isTemplate])
@@ -138,12 +113,11 @@ model BoardMember {
   roleId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  board     Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  board Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  role  Role  @relation(fields: [roleId], references: [id], onDelete: Cascade)
-
-  @@id([userId, boardId]) // 1 role / board
+  @@id([userId, boardId])
   @@index([roleId])
   @@index([boardId])
 }
@@ -157,9 +131,8 @@ model BoardJoinLink {
   isRevoke    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
-  board     Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  createdBy User  @relation(fields: [createdById], references: [id])
+  board       Board    @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  createdBy   User     @relation(fields: [createdById], references: [id])
 
   @@index([boardId])
 }
@@ -172,9 +145,8 @@ model List {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
-
-  board Board  @relation(fields: [boardId], references: [id], onDelete: Cascade)
-  Card  Card[]
+  Card      Card[]
+  board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
 }
 
 model Card {
@@ -185,41 +157,35 @@ model Card {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
   deletedAt  DateTime?
-
-  list List @relation(fields: [listId], references: [id], onDelete: Cascade)
+  list       List      @relation(fields: [listId], references: [id], onDelete: Cascade)
 }
 
 model User {
-  id              String         @id @default(cuid())
-  email           String         @unique
-  name            String?
-  status          UserStatusEnum @default(ACTIVE)
-  avatarUrl       String?
-  avatarPublicId  String?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  emailVerifiedAt DateTime?
-
-  //Relations
-  account        Account?
-  tokens         Token[]
-  otps           Otp[]
-  socialAccounts SocialAccounts[]
-
-  // memberships
-  workspaces                WorkspaceMember[]
+  id                        String              @id @default(cuid())
+  email                     String              @unique
+  name                      String?
+  status                    UserStatusEnum      @default(ACTIVE)
+  avatarUrl                 String?
+  avatarPublicId            String?
+  createdAt                 DateTime            @default(now())
+  updatedAt                 DateTime            @updatedAt
+  emailVerifiedAt           DateTime?
+  account                   Account?
+  createdJoinLinkBoards     BoardJoinLink[]
   boards                    BoardMember[]
+  otps                      Otp[]
+  socialAccounts            SocialAccounts[]
+  tokens                    Token?
   UserRole                  UserRole[]
   createdJoinLinkWorkspaces WorkspaceJoinLink[]
-  createdJoinLinkBoards     BoardJoinLink[]
+  workspaces                WorkspaceMember[]
 }
 
 model Account {
   id           String @id @default(cuid())
   userId       String @unique
   passwordHash String
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Token {
@@ -227,8 +193,7 @@ model Token {
   userId       String   @unique
   refreshToken String   @unique
   expiresAt    DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model SocialAccounts {
@@ -236,10 +201,9 @@ model SocialAccounts {
   userId     String
   provider   String
   providerId String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerId]) // 1 providerId duy nhất
+  @@unique([provider, providerId])
 }
 
 model Otp {
@@ -247,7 +211,15 @@ model Otp {
   userId    String
   otp       String
   expiresAt DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+enum UserStatusEnum {
+  ACTIVE
+  LOCKED
+}
+
+enum WorkspaceStatusEnum {
+  PUBLIC
+  PRIVATE
+}
