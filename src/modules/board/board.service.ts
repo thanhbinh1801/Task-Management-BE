@@ -89,6 +89,7 @@ export class BoardService {
     }
     try {
       await redisService.del(boardListKey(workspaceId));
+      await redisService.del(`workspace:list:${userId}`);
     } catch (err) {
       console.error('board list cache clear error', err);
     }
@@ -102,6 +103,7 @@ export class BoardService {
     }
     try {
       await redisService.del(boardKey(updateBoard.id));
+      await redisService.del(boardListKey(boardData.workspaceId));
     } catch (err) {
       console.error('board cache clear error', err);
     }
@@ -109,12 +111,17 @@ export class BoardService {
   }
 
   async deleteBoard(boarId: string, userId: string): Promise<void> {
+    const board = await this.boardRepo.findBoardById(boarId);
     const isDelete = await this.boardRepo.deleteBoard(boarId);
     if(!isDelete) {
       throw new InternalServerException('can not delete board');
     }
     try {
       await redisService.del(boardKey(boarId));
+      if(board?.workspaceId) {
+        await redisService.del(boardListKey(board.workspaceId));
+      }
+      await redisService.del(`workspace:list:${userId}`);
     } catch (err) {
       console.error('board cache clear error', err);
     }

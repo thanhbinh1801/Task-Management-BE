@@ -45,7 +45,10 @@ export class WorkspacePrismaRepository implements IWorkspaceRepository {
       boards: ws.boards.map(board => ({
         id: board.id,
         name: board.name,
-        workspaceId: board.workspaceId,
+        workspaceId: board.workspaceId ?? null,
+        isTemplate: board.isTemplate,
+        category: board.category ?? null,
+        description: board.description ?? null,
         createdAt: board.createdAt,
         updatedAt: board.updatedAt
       }))
@@ -85,7 +88,16 @@ export class WorkspacePrismaRepository implements IWorkspaceRepository {
         createdAt: m.createdAt,
         updatedAt: m.updatedAt
       })),
-      boards: workspace.boards
+      boards: workspace.boards.map(board => ({
+        id: board.id,
+        name: board.name,
+        workspaceId: board.workspaceId ?? null,
+        isTemplate: board.isTemplate,
+        category: board.category ?? null,
+        description: board.description ?? null,
+        createdAt: board.createdAt,
+        updatedAt: board.updatedAt
+      }))
     };
   }
 

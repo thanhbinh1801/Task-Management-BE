@@ -13,7 +13,10 @@ export interface WorkspaceMemberResponse {
 export interface BoardResponse {
   id: string;
   name: string;
-  workspaceId: string;
+  workspaceId?: string | null;
+  isTemplate: boolean;
+  category?: string | null;
+  description?: string | null;
   createdAt: Date;
   updatedAt: Date;  
 }
@@ -21,7 +24,7 @@ export interface BoardResponse {
 export interface WorkspaceResponse {
   id: string;
   name: string;
-  visibility: string | null;
+  visibility: string;
   createdAt: Date;
   updatedAt: Date;
   members: WorkspaceMemberResponse[];
