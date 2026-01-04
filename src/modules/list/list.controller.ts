@@ -85,8 +85,7 @@ export default class ListController {
       listId: listId,
       boardId: boardId,
       nameList: req.body?.nameList,
-      leftId: req.body?.leftIndex,
-      rightId: req.body?.rightIndex,
+      position: req.body?.position,
     });
 
       const updatedList = await this.listService.updateList(listData);

@@ -1,27 +1,30 @@
 import { ICardRepository } from "../interfaces/ICardRepository";
 import { prisma } from "@/configs";
-import { Card } from "@prisma/client";
+import { Card, Prisma } from "@prisma/client";
 import { CardCreateRequest, CardUpdateRequest } from "../../dtos/requests/card.request";
 import { NotFoundException, ConflictException } from "@/commons";
 
 export class CardPrismaRepository implements ICardRepository {
   async findCards(listId: string): Promise<Card[]> {
     return prisma.card.findMany({
-      where: {listId: listId, deletedAt: null}
+      where: {listId: listId, deletedAt: null},
+      orderBy: { position: 'asc' }
     });
   }
 
   async findCardById(cardId: string): Promise<Card | null> {
     return prisma.card.findFirst({
-      where: { id: cardId, deletedAt: null }
+      where: { id: cardId, deletedAt: null },
+      orderBy: { position: 'asc' }
     });
   }
 
-  async createCard(cardData: CardCreateRequest, listId: string): Promise<Card>{ 
+  async createCard(cardData: CardCreateRequest, listId: string, position: number): Promise<Card>{ 
     return prisma.card.create({
       data: {
         name: cardData.nameCard,
         listId: listId,
+        position: new Prisma.Decimal(position),
       },
     });
   }
@@ -31,6 +34,8 @@ export class CardPrismaRepository implements ICardRepository {
       where: { id: cardData.cardId },
       data: {
         ...( cardData.nameCard && { name: cardData.nameCard }),
+        ...( cardData.listIdTarget && { listId: cardData.listIdTarget }),
+        ...( cardData.position && { position: new Prisma.Decimal(cardData.position) }),
       },
     });
   }
@@ -60,5 +65,13 @@ export class CardPrismaRepository implements ICardRepository {
     return prisma.card.delete({
       where: { id: cardId }
     });
+  }
+
+  async findMaxPositionOfCardInList(listId: string): Promise<number> {
+    const maxPositionList = await prisma.card.findFirst({
+      where: { listId: listId, deletedAt: null },
+      orderBy: { position: 'desc' },
+    });
+    return maxPositionList?.position.toNumber() ?? 0;
   }
 }

@@ -71,15 +71,11 @@ export default class CardController {
         throw new BadRequestException("cardId not found");
       }
 
-      const listId = req.params.listId;
-      if(!listId) {
-        throw new BadRequestException("listId not found");
-      }
-
       const cardData = CardUpdateRequestSchema.parse({
         cardId: cardId,
-        listId: listId,
         nameCard: req.body?.nameCard,
+        listIdTarget: req.body?.listIdTarget,
+        position: req.body?.position,
       });
 
       const updatedCard = await this.cardService.updateCard(cardData);

@@ -8,7 +8,7 @@ import { clearRbacBoardCache } from "@/commons/utils/rbacCache";
 import { redisService } from "@/modules/redis/redis.service";
 
 const boardListKey = (workspaceId: string) => `board:list:${workspaceId}`;
-const boardKey = (boardId: string) => `board:${boardId}`;
+export const boardKey = (boardId: string) => `board:${boardId}`;
 // const BOARD_TTL_SECONDS = 300; 
 
 export class BoardService {

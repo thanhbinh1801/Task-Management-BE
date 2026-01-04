@@ -82,6 +82,7 @@ export default class UserController {
   updateAvatarUser = async (req: Request, res: Response, next: NextFunction) => {
     try{
       const userId = req.params.id; 
+      console.log("User id: ", userId);
       if(!userId) {
         throw new BadRequestException("user id not found");
       }

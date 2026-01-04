@@ -4,8 +4,9 @@ import { CardCreateRequest, CardUpdateRequest } from "../../dtos/requests/card.r
 export  interface ICardRepository {
   findCards(boardId: string): Promise<Card[]>;
   findCardById(cardId: string): Promise<Card | null>;
-  createCard(cardData: CardCreateRequest, listId: string): Promise<Card>;
+  createCard(cardData: CardCreateRequest, listId: string, position: number): Promise<Card>;
   updateCard(cardData: CardUpdateRequest): Promise<Card>;
   deleteCard(cardId: string): Promise<Card>;
   hardDeleteCard(cardId: string): Promise<Card>;
+  findMaxPositionOfCardInList(listId: string): Promise<number>;
 }

@@ -56,7 +56,8 @@ export class CardService {
   }
 
   async createCard(cardData: CardCreateRequest, listId: string): Promise<Card> {
-    const newCard = await this.cardRepo.createCard(cardData, listId);
+    const position = await this.cardRepo.findMaxPositionOfCardInList(listId) + 1000;
+    const newCard = await this.cardRepo.createCard(cardData, listId, position);
     if(!newCard) {
       throw new InternalServerException("can not create card");
     }
