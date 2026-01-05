@@ -156,11 +156,11 @@ import { prisma } from "../configs/prisma";
                 position: 1,
                 Card: {
                   create: [
-                    { name: 'Getting started with Trello' },
-                    { name: 'Ways to contact Dr. Theisen Remotely' },
-                    { name: 'Coping with Covid-19' },
-                    { name: 'Remote Class Plan and Revised Schedule' },
-                    { name: 'Links to eTextbook - Biochemistry' }
+                    { name: 'Getting started with Trello' , position: 1},
+                    { name: 'Ways to contact Dr. Theisen Remotely' , position: 2},
+                    { name: 'Coping with Covid-19' , position: 3},
+                    { name: 'Remote Class Plan and Revised Schedule' , position: 4},
+                    { name: 'Links to eTextbook - Biochemistry' , position: 5}
                   ]
                 }
               },
@@ -169,12 +169,12 @@ import { prisma } from "../configs/prisma";
                 position: 2,
                 Card: {
                   create: [
-                    { name: 'Week of 3/23-3/29' },
-                    { name: 'Week of 3/30-4/5' },
-                    { name: 'Week of 4/6-12' },
-                    { name: 'Week of 4/13-19' },
-                    { name: 'Week of 4/20-26' },
-                    { name: 'Week of 4/27-5/3' }
+                    { name: 'Week of 3/23-3/29' , position: 1},
+                    { name: 'Week of 3/30-4/5' , position: 2},
+                    { name: 'Week of 4/6-12' , position: 3},
+                    { name: 'Week of 4/13-19' , position: 4},
+                    { name: 'Week of 4/20-26' , position: 5},
+                    { name: 'Week of 4/27-5/3' , position: 6}
                   ]
                 }
               },
@@ -183,9 +183,9 @@ import { prisma } from "../configs/prisma";
                 position: 3,
                 Card: {
                   create: [
-                    { name: 'Poster - Both Tracks' },
-                    { name: 'Final Lab Report - Catalase Track' },
-                    { name: 'Final Lab Report - Hexokinase Track' }
+                    { name: 'Poster - Both Tracks' , position: 1},
+                    { name: 'Final Lab Report - Catalase Track' , position: 2},
+                    { name: 'Final Lab Report - Hexokinase Track' , position: 3}
                   ]
                 }
               },
@@ -194,9 +194,9 @@ import { prisma } from "../configs/prisma";
                 position: 4,
                 Card: {
                   create: [
-                    { name: 'Exam 2: Ch. 5-8' },
-                    { name: 'Exam 3: Ch. 10-12, 15-16, and 18-21' },
-                    { name: 'Optional Retake (Finals Week)' }
+                    { name: 'Exam 2: Ch. 5-8' , position: 1},
+                    { name: 'Exam 3: Ch. 10-12, 15-16, and 18-21' , position: 2},
+                    { name: 'Optional Retake (Finals Week)' , position: 3}
                   ]
                 }
               }

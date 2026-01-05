@@ -4,6 +4,7 @@ import { List } from "@prisma/client";
 import { ListCreateRequest, ListUpdateRequest } from "./dtos/requests/list.request";
 import { ListResponse } from "./dtos/responses/list.response";
 import { redisService } from "@/modules/redis/redis.service";
+import { boardKey } from "@/modules/board/board.service";
 
 const listPerBoardKey = (boardId: string) => `list:board:${boardId}`;
 const listKey = (listId: string) => `list:${listId}`;
@@ -57,12 +58,14 @@ export class ListService {
   }
 
   async createList(listData: ListCreateRequest, boardId: string): Promise<List> {
-    const newList = await this.listRepo.createList(listData, boardId);
+    const position = await this.listRepo.findMaxPositionOfList(boardId) + 1000;
+    const newList = await this.listRepo.createList(listData, boardId, position);
     if(!newList) {
       throw new InternalServerException("can not create list");
     }
     try {
       await redisService.del(listPerBoardKey(boardId));
+      await redisService.del(boardKey(boardId));
     } catch (err) {
       console.error('list cache clear error', err);
     }
@@ -76,6 +79,8 @@ export class ListService {
     }
     try {
       await redisService.del(listKey(updateList.id));
+      await redisService.del(listPerBoardKey(listData.boardId));
+      await redisService.del(boardKey(listData.boardId));
     } catch (err) {
       console.error('list cache clear error', err);
     }
@@ -83,24 +88,34 @@ export class ListService {
   }
 
   async deleteList(listId: string): Promise<void> {
+    const list = await this.listRepo.findListById(listId);
     const isDelete = await this.listRepo.deleteList(listId);
     if(!isDelete) {
       throw new InternalServerException('can not delete list');
     }
     try {
       await redisService.del(listKey(listId));
+      if(list?.boardId) {
+        await redisService.del(listPerBoardKey(list.boardId));
+        await redisService.del(boardKey(list.boardId));
+      }
     } catch (err) {
       console.error('list cache clear error', err);
     }
   }
 
   async hardDeleteList(listId: string): Promise<void> {
+    const list = await this.listRepo.findListById(listId);
     const isDelete = await this.listRepo.hardDeleteList(listId);
     if (!isDelete) {
       throw new InternalServerException('can not hard delete list');
     }
     try {
       await redisService.del(listKey(listId));
+      if(list?.boardId) {
+        await redisService.del(listPerBoardKey(list.boardId));
+        await redisService.del(boardKey(list.boardId));
+      }
     } catch (err) {
       console.error('list cache clear error', err);
     }

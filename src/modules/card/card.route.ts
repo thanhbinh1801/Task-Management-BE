@@ -82,9 +82,13 @@ cardRegistry.registerPath({
         "application/json": {
           schema: z.object({
             name: z.string(),
+            listIdTarget: z.string(),
+            position: z.number(),
           }),
           example: {
             nameCard: "Card 1 Updated",
+            listIdTarget: "listIdTarget",
+            position: 1000,
           },
         },
       },
