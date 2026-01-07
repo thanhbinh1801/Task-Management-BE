@@ -67,6 +67,9 @@ export default class CardController {
   updateCard = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const cardId = req.params.cardId;
+      const listId = req.params.listId;
+      const boardId = req.params.boardId;
+      
       if(!cardId) {
         throw new BadRequestException("cardId not found");
       }
@@ -78,7 +81,7 @@ export default class CardController {
         position: req.body?.position,
       });
 
-      const updatedCard = await this.cardService.updateCard(cardData);
+      const updatedCard = await this.cardService.updateCard(cardData, listId, boardId);
       res.status(200).json({
         status: "success",
         message: "update card successfully",
