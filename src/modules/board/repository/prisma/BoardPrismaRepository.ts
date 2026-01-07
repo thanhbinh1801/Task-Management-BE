@@ -19,8 +19,9 @@ export class BoardPrismaRepository implements IBoardRepository {
         },
         List: {
           where: { deletedAt: null },
+          orderBy: { position: 'asc' },
           include: {
-            Card: { where: { deletedAt: null } }
+            Card: { where: { deletedAt: null }, orderBy: { position: 'asc' } }
           }
         }
       }
@@ -51,7 +52,8 @@ export class BoardPrismaRepository implements IBoardRepository {
         cards: list.Card.map(card => ({
           id: card.id,
           name: card.name,
-          isComplete: card.isComplete
+          isComplete: card.isComplete,
+          position: card.position.toNumber()
         }))
       }))
     }));
@@ -69,6 +71,7 @@ export class BoardPrismaRepository implements IBoardRepository {
         },
         List: {
           where: { deletedAt: null },
+          orderBy: { position: 'asc' },
           include: {
             Card: { where: { deletedAt: null } }
           }
@@ -102,7 +105,8 @@ export class BoardPrismaRepository implements IBoardRepository {
         cards: list.Card.map(card => ({
           id: card.id,
           name: card.name,
-          isComplete: card.isComplete
+          isComplete: card.isComplete,
+          position: card.position.toNumber()
         }))
       }))
     }

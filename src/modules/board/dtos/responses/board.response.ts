@@ -14,6 +14,7 @@ export interface CardResponse {
   id: string;
   name: string;
   isComplete: boolean;
+  position: number;
 }
 
 export interface ListResponse {

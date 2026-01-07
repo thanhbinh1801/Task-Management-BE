@@ -3,6 +3,7 @@ import { ICardRepository } from "./repository/interfaces/ICardRepository";
 import { Card } from "@prisma/client";
 import { CardCreateRequest, CardUpdateRequest } from "./dtos/requests/card.request";
 import { redisService } from "@/modules/redis/redis.service";
+import { boardKey } from "@/modules/board/board.service";
 
 const cardPerListKey = (listId: string) => `card:list:${listId}`;
 const cardKey = (cardId: string) => `card:${cardId}`;
@@ -69,13 +70,20 @@ export class CardService {
     return newCard;
   }
 
-  async updateCard(cardData: CardUpdateRequest): Promise<Card> {
+  async updateCard(cardData: CardUpdateRequest, listId: string, boardId: string): Promise<Card> {
     const updatedCard = await this.cardRepo.updateCard(cardData);
     if(!updatedCard) {
       throw new InternalServerException("can not update card");
     }
     try {
       await redisService.del(cardKey(updatedCard.id));
+      await redisService.del(cardPerListKey(listId)); // List cũ
+      await redisService.del(boardKey(boardId)); // Board cache
+      
+      // Nếu move card sang list khác, xóa cache list mới
+      if (cardData.listIdTarget && cardData.listIdTarget !== listId) {
+        await redisService.del(cardPerListKey(cardData.listIdTarget));
+      }
     } catch (err) {
       console.error('card cache clear error', err);
     }
