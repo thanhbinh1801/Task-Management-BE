@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { asyncHandler, authorize, authenticate } from "@/commons";
 import { AuthRouter } from "@/modules/auth/auth.route";
 import AuthController from "@/modules/auth/auth.controller";
 import AuthService from "@/modules/auth/services/auth.service";
@@ -179,9 +180,82 @@ const initjoinLinkRouter = () => {
   mainRouter.use("/invite", JoinLinkRouter(joinLinkController));
 }
 
+const initDirectBoardLabelRouter = () => {
+  const labelRepository = new LabelPrismaRepository();
+  const labelService = new LabelService(labelRepository);
+  const labelController = new LabelController(labelService);
+
+  // Create a router for /api/v1/board/{boardId}/label
+  const router = Router({ mergeParams: true });
+
+  router.get(
+    "/",
+    asyncHandler(authenticate()),
+    authorize(["VIEW_BOARD"], "board"),
+    asyncHandler(labelController.getBoardLabels)
+  );
+
+  router.post(
+    "/",
+    asyncHandler(authenticate()),
+    authorize(["UPDATE_BOARD"], "board"),
+    asyncHandler(labelController.createLabel)
+  );
+
+  router.put(
+    "/:labelId",
+    asyncHandler(authenticate()),
+    authorize(["UPDATE_BOARD"], "board"),
+    asyncHandler(labelController.updateLabel)
+  );
+
+  router.delete(
+    "/:labelId",
+    asyncHandler(authenticate()),
+    authorize(["UPDATE_BOARD"], "board"),
+    asyncHandler(labelController.deleteLabel)
+  );
+
+  mainRouter.use("/board/:boardId/label", router);
+}
+
+const initDirectCardLabelRouter = () => {
+  const labelRepository = new LabelPrismaRepository();
+  const labelService = new LabelService(labelRepository);
+  const labelController = new LabelController(labelService);
+
+  // Create a router for /api/v1/card/{cardId}/label
+  const router = Router({ mergeParams: true });
+
+  router.get(
+    "/",
+    asyncHandler(authenticate()),
+    authorize(["VIEW_CARD"], "board"),
+    asyncHandler(labelController.getLabelsOfCard)
+  );
+
+  router.post(
+    "/",
+    asyncHandler(authenticate()),
+    authorize(["UPDATE_CARD"], "board"),
+    asyncHandler(labelController.assignLabelToCard)
+  );
+
+  router.delete(
+    "/:labelId",
+    asyncHandler(authenticate()),
+    authorize(["UPDATE_CARD"], "board"),
+    asyncHandler(labelController.removeLabelFromCard)
+  );
+
+  mainRouter.use("/card/:cardId/label", router);
+}
+
 initAuthRouter();
 initUserRouter();
 initTemplateRouter();
 initWorkspaceRouter();
 initjoinLinkRouter();
+initDirectBoardLabelRouter();
+initDirectCardLabelRouter();
 export default mainRouter;

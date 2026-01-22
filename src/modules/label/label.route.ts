@@ -13,13 +13,12 @@ import {
 export const labelRegistry = new OpenAPIRegistry();
 
 labelRegistry.registerPath({
-  path: "/api/v1/workspace/{workspaceId}/board/{boardId}/label",
+  path: "/api/v1/board/{boardId}/label",
   method: "get",
   tags: ["Label"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
       boardId: z.string(),
     }),
   },
@@ -27,13 +26,12 @@ labelRegistry.registerPath({
 });
 
 labelRegistry.registerPath({
-  path: "/api/v1/workspace/{workspaceId}/board/{boardId}/label",
+  path: "/api/v1/board/{boardId}/label",
   method: "post",
   tags: ["Label"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
       boardId: z.string(),
     }),
     body: {
@@ -52,13 +50,12 @@ labelRegistry.registerPath({
 });
 
 labelRegistry.registerPath({
-  path: "/api/v1/workspace/{workspaceId}/board/{boardId}/label/{labelId}",
+  path: "/api/v1/board/{boardId}/label/{labelId}",
   method: "put",
   tags: ["Label"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
       boardId: z.string(),
       labelId: z.string(),
     }),
@@ -78,13 +75,12 @@ labelRegistry.registerPath({
 });
 
 labelRegistry.registerPath({
-  path: "/api/v1/workspace/{workspaceId}/board/{boardId}/label/{labelId}",
+  path: "/api/v1/board/{boardId}/label/{labelId}",
   method: "delete",
   tags: ["Label"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
       boardId: z.string(),
       labelId: z.string(),
     }),
@@ -93,14 +89,12 @@ labelRegistry.registerPath({
 });
 
 labelRegistry.registerPath({
-  path: "/api/v1/workspace/{workspaceId}/board/{boardId}/card/{cardId}/label",
+  path: "/api/v1/card/{cardId}/label",
   method: "get",
   tags: ["Label"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       cardId: z.string(),
     }),
   },
@@ -108,14 +102,12 @@ labelRegistry.registerPath({
 });
 
 labelRegistry.registerPath({
-  path: "/api/v1/workspace/{workspaceId}/board/{boardId}/card/{cardId}/label",
+  path: "/api/v1/card/{cardId}/label",
   method: "post",
   tags: ["Label"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       cardId: z.string(),
     }),
     body: {
@@ -133,14 +125,12 @@ labelRegistry.registerPath({
 });
 
 labelRegistry.registerPath({
-  path: "/api/v1/workspace/{workspaceId}/board/{boardId}/card/{cardId}/label/{labelId}",
+  path: "/api/v1/card/{cardId}/label/{labelId}",
   method: "delete",
   tags: ["Label"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       cardId: z.string(),
       labelId: z.string(),
     }),
@@ -186,21 +176,21 @@ export function CardLabelRouter(labelController: LabelController): Router {
   const router = Router({ mergeParams: true });
 
   router.get(
-    "/:cardId/label",
+    "/label",
     asyncHandler(authenticate()),
     authorize(["VIEW_CARD"], "board"),
     asyncHandler(labelController.getLabelsOfCard)
   );
 
   router.post(
-    "/:cardId/label",
+    "/label",
     asyncHandler(authenticate()),
     authorize(["UPDATE_CARD"], "board"),
     asyncHandler(labelController.assignLabelToCard)
   );
 
   router.delete(
-    "/:cardId/label/:labelId",
+    "/label/:labelId",
     asyncHandler(authenticate()),
     authorize(["UPDATE_CARD"], "board"),
     asyncHandler(labelController.removeLabelFromCard)
