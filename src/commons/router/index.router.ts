@@ -55,6 +55,11 @@ import CardController from "@/modules/card/card.controller";
 import { CardService } from "@/modules/card/card.service";
 import { CardPrismaRepository } from "@/modules/card/repository/prisma/CardPrismaRepository";
 
+import { BoardLabelRouter, CardLabelRouter } from "@/modules/label/label.route";
+import LabelController from "@/modules/label/label.controller";
+import { LabelService } from "@/modules/label/label.service";
+import { LabelPrismaRepository } from "@/modules/label/repository/prisma/LabelPrismaRepository";
+
 import JoinLinkRouter from "@/modules/join-link/joinlink.route";
 import JoinLinkController from "@/modules/join-link/joinlink.controller";
 import JoinLinkService from "@/modules/join-link/joinlink.service";
@@ -107,6 +112,12 @@ const initListRouter = () => {
 const initBoardRouter = () => {
   const listRouter = initListRouter();
 
+  const labelRepository = new LabelPrismaRepository();
+  const labelService = new LabelService(labelRepository);
+  const labelController = new LabelController(labelService);
+  const boardLabelRouter = BoardLabelRouter(labelController);
+  const cardLabelRouter = CardLabelRouter(labelController);
+
   const boardJoinLinkRepository = new BoardJoinLinkRepository();
   const boardJoinLinkService = new BoardJoinLinkService(boardJoinLinkRepository);
   const boardJoinLinkController = new BoardJoinLinkController(boardJoinLinkService);
@@ -121,7 +132,7 @@ const initBoardRouter = () => {
   const boardRepository = new BoardPrismaRepository();
   const boardService = new BoardService(boardRepository, templateRepository);
   const boardController = new BoardController(boardService);
-  const boardRouter = BoardRouter(boardController, memberBoardRouter, boardJoinLinkRouter, listRouter);
+  const boardRouter = BoardRouter(boardController, memberBoardRouter, boardJoinLinkRouter, listRouter, boardLabelRouter, cardLabelRouter);
 
   return boardRouter;
 }

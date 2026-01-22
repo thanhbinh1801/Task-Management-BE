@@ -270,6 +270,102 @@ import { prisma } from "../configs/prisma";
       });
 
       console.log('System templates seeded successfully!');
+
+      // Create test user for testing
+      console.log('Creating test user...');
+      const bcrypt = require('bcryptjs');
+      const testPassword = await bcrypt.hash('Test@123', 10);
+      
+      const testUser = await prisma.user.upsert({
+        where: { email: 'test@example.com' },
+        update: {},
+        create: {
+          email: 'test@example.com',
+          name: 'Test User',
+          status: 'ACTIVE',
+          emailVerifiedAt: new Date(),
+          account: {
+            create: {
+              passwordHash: testPassword
+            }
+          },
+          UserRole: {
+            create: {
+              roleId: admin.id
+            }
+          }
+        }
+      });
+
+      // Create test workspace
+      console.log('Creating test workspace...');
+      const testWorkspace = await prisma.workspace.upsert({
+        where: { id: 'test-workspace-001' },
+        update: {},
+        create: {
+          id: 'test-workspace-001',
+          name: 'Test Workspace',
+          visibility: 'PUBLIC',
+          members: {
+            create: {
+              userId: testUser.id,
+              roleId: OwnerWorkspace.id
+            }
+          }
+        }
+      });
+
+      // Create test board
+      console.log('Creating test board...');
+      const testBoard = await prisma.board.upsert({
+        where: { id: 'test-board-001' },
+        update: {},
+        create: {
+          id: 'test-board-001',
+          name: 'Test Board for Labels',
+          workspaceId: testWorkspace.id,
+          isTemplate: false,
+          members: {
+            create: {
+              userId: testUser.id,
+              roleId: OwnerBoard.id
+            }
+          },
+          List: {
+            create: [
+              {
+                name: 'To Do',
+                position: 1,
+                Card: {
+                  create: [
+                    { name: 'Test Card 1', position: 1 },
+                    { name: 'Test Card 2', position: 2 }
+                  ]
+                }
+              },
+              {
+                name: 'In Progress',
+                position: 2
+              },
+              {
+                name: 'Done',
+                position: 3
+              }
+            ]
+          }
+        }
+      });
+
+      console.log('\n✅ Test data created successfully!');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('📋 Test Account Credentials:');
+      console.log('   Email: test@example.com');
+      console.log('   Password: Test@123');
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+      console.log('🔑 Test IDs:');
+      console.log(`   Workspace ID: ${testWorkspace.id}`);
+      console.log(`   Board ID: ${testBoard.id}`);
+      console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     }
 
     main()

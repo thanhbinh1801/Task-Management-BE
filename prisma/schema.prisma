@@ -102,6 +102,7 @@ model Board {
   joinLinks   BoardJoinLink[]
   members     BoardMember[]
   List        List[]
+  labels      Label[]
 
   @@index([workspaceId])
   @@index([isTemplate])
@@ -159,6 +160,32 @@ model Card {
   updatedAt  DateTime  @updatedAt
   deletedAt  DateTime?
   list       List      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  labels     CardLabel[]
+}
+
+model Label {
+  id        String    @id @default(cuid())
+  name      String
+  color     String
+  boardId   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  board     Board     @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  cardLabels CardLabel[]
+
+  @@index([boardId])
+}
+
+model CardLabel {
+  cardId    String
+  labelId   String
+  createdAt DateTime @default(now())
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  label     Label    @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, labelId])
+  @@index([labelId])
 }
 
 model User {
