@@ -105,7 +105,9 @@ export function BoardRouter(
   boardController: BoardController, 
   memberBoardRouter: Router,
   boardJoinLinkRouter: Router,
-  listRouter: Router
+  listRouter: Router,
+  boardLabelRouter: Router,
+  cardLabelRouter: Router,
 ) : Router 
   {
   const boardRouter = Router({ mergeParams: true });
@@ -124,6 +126,8 @@ export function BoardRouter(
   boardRouter.use("/:boardId/board-join-link", boardJoinLinkRouter);  
   boardRouter.use("/:boardId/member-board", memberBoardRouter);
   boardRouter.use("/:boardId/list", listRouter);
+  boardRouter.use("/:boardId/label", boardLabelRouter);
+  boardRouter.use("/:boardId/card", cardLabelRouter);
 
   return boardRouter;
 }
