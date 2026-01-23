@@ -161,6 +161,7 @@ model Card {
   deletedAt  DateTime?
   list       List      @relation(fields: [listId], references: [id], onDelete: Cascade)
   labels     CardLabel[]
+  members    CardMember[]
 }
 
 model Label {
@@ -201,12 +202,24 @@ model User {
   account                   Account?
   createdJoinLinkBoards     BoardJoinLink[]
   boards                    BoardMember[]
+  cardMembers               CardMember[]
   otps                      Otp[]
   socialAccounts            SocialAccounts[]
   tokens                    Token?
   UserRole                  UserRole[]
   createdJoinLinkWorkspaces WorkspaceJoinLink[]
   workspaces                WorkspaceMember[]
+}
+
+model CardMember {
+  userId     String
+  cardId     String
+  assignedAt DateTime @default(now())
+  card       Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, cardId])
+  @@index([cardId])
 }
 
 model Account {

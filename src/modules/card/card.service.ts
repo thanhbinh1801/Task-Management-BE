@@ -6,7 +6,7 @@ import { redisService } from "@/modules/redis/redis.service";
 import { boardKey } from "@/modules/board/board.service";
 
 const cardPerListKey = (listId: string) => `card:list:${listId}`;
-const cardKey = (cardId: string) => `card:${cardId}`;
+export const cardKey = (cardId: string) => `card:${cardId}`;
 const CARD_TTL_SECONDS = 300; // 5 minutes
 
 export class CardService {
