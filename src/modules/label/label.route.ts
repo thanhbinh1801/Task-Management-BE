@@ -176,21 +176,21 @@ export function CardLabelRouter(labelController: LabelController): Router {
   const router = Router({ mergeParams: true });
 
   router.get(
-    "/label",
+    "/:cardId/label",
     asyncHandler(authenticate()),
     authorize(["VIEW_CARD"], "board"),
     asyncHandler(labelController.getLabelsOfCard)
   );
 
   router.post(
-    "/label",
+    "/:cardId/label",
     asyncHandler(authenticate()),
     authorize(["UPDATE_CARD"], "board"),
     asyncHandler(labelController.assignLabelToCard)
   );
 
   router.delete(
-    "/label/:labelId",
+    "/:cardId/label/:labelId",
     asyncHandler(authenticate()),
     authorize(["UPDATE_CARD"], "board"),
     asyncHandler(labelController.removeLabelFromCard)
