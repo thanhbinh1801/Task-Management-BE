@@ -14,31 +14,27 @@ export default class MemberRepository implements IMemberBoardRepository {
       throw new NotFoundException('Board does not exist');
     };
 
-    const userId = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email }
     });
 
-    if (!userId) return null;
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     const existingMember = await prisma.boardMember.findUnique({
-      where: { userId_boardId: { userId: userId.id, boardId }
+      where: { userId_boardId: { userId: user.id, boardId }
       }
     });
     if (existingMember) {
       throw new ConflictException('User is already a member of the board');
     }
 
-    const role = await prisma.role.findFirst({
-      where: { roleName: 'MEMBER' }
-    });
-
-    if (!role) return null;
-
     return prisma.boardMember.create({
       data: {
-        userId: userId.id,
-        boardId: boardId,
-        roleId: role?.id || ''
+        user: { connect: { id: user.id } },
+        board: { connect: { id: boardId } },
+        role: { connect: { roleName: 'MemberBoard' } }
       }
     });
   } 

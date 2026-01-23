@@ -5,6 +5,8 @@ import cors from "cors";
 import express, { Express } from "express";
 import helmet from "helmet";
 import morgan from "morgan";
+import { createServer } from "http";
+import notificationGateway from "./modules/notifications/notification.gateway";
 
 import {buildOpenAPIRouter} from "./swagger/openAPIRouter";
 import { appEnv } from "./configs";
@@ -16,9 +18,11 @@ import cookieParser from "cookie-parser";
 import { errorHandler } from "./commons/exceptions/error.handler";
 
 const app: Express = express();
+const httpServer = createServer(app);
+notificationGateway.initialize(httpServer);
 
 app.use(express.json());
-
+app.set("trsust proxy", true);
 // Set the application to trust the reverse proxy
 app.set("trust proxy", true);
 
@@ -61,7 +65,7 @@ app.use(buildOpenAPIRouter())
 
 app.use(errorHandler);
 
-app.listen(appEnv.PORT, () => {
+httpServer.listen(appEnv.PORT, () => {
   const { NODE_ENV, HOST, PORT } = appEnv;
   console.log(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`);
 });

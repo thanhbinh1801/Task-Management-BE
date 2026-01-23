@@ -13,34 +13,28 @@ export default class MemberWorkspaceRepository implements IMemberWorkspaceReposi
       throw new NotFoundException('Workspace not found');
     }
 
-    const userId = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { email }
     });
 
-    if (!userId) return null;
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
     const existingMember = await prisma.workspaceMember.findUnique({
       where: {
-        userId_workspaceId: { userId: userId.id, workspaceId }
+        userId_workspaceId: { userId: user.id, workspaceId }
       }
     });
     if (existingMember) {
       throw new ConflictException('User is already a member of the workspace');
     }
 
-    const role = await prisma.role.findFirst({
-      where: { roleName: 'MemberWorkspace' }
-    });
-
-    if (!role) {
-      throw new BadRequestException('Role not found');
-    }
-
     return prisma.workspaceMember.create({
       data: {
-        userId: userId.id,
-        workspaceId: workspaceId,
-        roleId: role?.id || ''
+        user: { connect: { id: user.id } },
+        workspace: { connect: { id: workspaceId } },
+        role: { connect: { roleName: 'MemberWorkspace' } }
       }
     });
   } 

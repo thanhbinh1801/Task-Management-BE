@@ -65,6 +65,11 @@ import JoinLinkController from "@/modules/join-link/joinlink.controller";
 import JoinLinkService from "@/modules/join-link/joinlink.service";
 import JoinLinkRepository from "@/modules/join-link/repositories/prisma/JoinLinkPrismaRepository";
 
+import { NotificationRepository } from "@/modules/notifications/repository/prisma/notification.repository";
+import { NotificationService } from "@/modules/notifications/services/notification.service";
+import { NotificationEventService } from "@/modules/notifications/services/notification-event.service";
+import NotificationController from "@/modules/notifications/notification.controller";
+import notificationRouter from "@/modules/notifications/notification.route";
 
 const mainRouter = Router();
 
@@ -123,9 +128,12 @@ const initBoardRouter = () => {
   const boardJoinLinkController = new BoardJoinLinkController(boardJoinLinkService);
   const boardJoinLinkRouter = BoardJoinLinkRouter(boardJoinLinkController);
 
+  const notificationRepository = new NotificationRepository();
+  const notificationEventService = new NotificationEventService(notificationRepository);
+
   const memberBoardRepository = new MemberBoardRepository();
   const memberBoardService = new MemberBoardService(memberBoardRepository);
-  const memberBoardController = new MemberBoardController(memberBoardService);
+  const memberBoardController = new MemberBoardController(memberBoardService, notificationEventService);
   const memberBoardRouter = MemberBoardRouter(memberBoardController);
 
   const templateRepository = new TemplatePrismaRepository();
@@ -148,21 +156,22 @@ const initTemplateRouter = () => {
 const initWorkspaceRouter = () => {
   const boardRouter = initBoardRouter();
   
-  //workspace router dependencies
   const workspaceJoinLinkRepository = new WorkspaceJoinLinkRepository();
   const workspaceJoinLinkService = new WorkspaceJoinLinkService(workspaceJoinLinkRepository);
   const workspaceJoinLinkController = new WorkspaceJoinLinkController(workspaceJoinLinkService);
   const workspaceJoinLinkRouter = WorkspaceJoinLinkRouter(workspaceJoinLinkController);
 
+  const notificationRepository = new NotificationRepository();
+  const notificationEventService = new NotificationEventService(notificationRepository);
+
   const memberWorkspaceRepository = new MemberWorkspaceRepository();
   const memberWorkspaceService = new MemberWorkspaceService(memberWorkspaceRepository);
-  const memberWorkspaceController = new MemberWorkspaceController(memberWorkspaceService);
+  const memberWorkspaceController = new MemberWorkspaceController(memberWorkspaceService, notificationEventService);
   const memberWorkspaceRouter = MemberWorkspaceRouter(memberWorkspaceController);
 
   const workspaceRepository = new WorkspacePrismaRepository();
   const workspaceService = new WorkspaceService(workspaceRepository);
   const workspaceController = new WorkspaceController(workspaceService);
-
 
   mainRouter.use("/workspace", WorkspaceRouter(workspaceController, workspaceJoinLinkRouter, memberWorkspaceRouter, boardRouter));
 }
@@ -173,15 +182,27 @@ const initjoinLinkRouter = () => {
   const memberBoardRepository = new MemberBoardRepository();
   const memberBoardService = new MemberBoardService(memberBoardRepository);
 
+  const notificationRepository = new NotificationRepository();
+  const notificationEventService = new NotificationEventService(notificationRepository);
+
   const joinLinkRepository = new JoinLinkRepository();
-  const joinLinkService = new JoinLinkService(joinLinkRepository, memberWorkspaceService, memberBoardService);
+  const joinLinkService = new JoinLinkService(joinLinkRepository, memberWorkspaceService, memberBoardService, notificationEventService);
   const joinLinkController = new JoinLinkController(joinLinkService);
   mainRouter.use("/invite", JoinLinkRouter(joinLinkController));
 }
+
+const initNotificationRouter = () => {
+  const notificationRepository = new NotificationRepository();
+  const notificationService = new NotificationService(notificationRepository);
+  const notificationController = new NotificationController(notificationService);
+
+  mainRouter.use("/notifications", notificationRouter(notificationController));
+};
 
 initAuthRouter();
 initUserRouter();
 initTemplateRouter();
 initWorkspaceRouter();
 initjoinLinkRouter();
+initNotificationRouter();
 export default mainRouter;

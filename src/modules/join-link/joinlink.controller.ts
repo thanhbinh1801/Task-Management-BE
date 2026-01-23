@@ -32,7 +32,8 @@ export default class JoinLinkController {
       if (!email) {
         throw new BadRequestException('not found email');
       }
-      const isJoin = await this.joinLinkService.join(token, email);
+      const actorId = req.users?.userId;
+      const isJoin = await this.joinLinkService.join(token, email, actorId);
       res.status(200).json({
         status: "success",
         message: "join successfully",
