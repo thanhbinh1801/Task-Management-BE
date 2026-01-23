@@ -6,6 +6,13 @@ import z from "zod";
 import { ChecklistController } from "./checklist.controller";
 import { ChecklistService } from "./checklist.service";
 import { ChecklistCreateRequestSchema, ChecklistItemCreateRequestSchema, ChecklistItemUpdateRequestSchema } from "./dtos/requests/checklist.request";
+import {
+  GetChecklistsResponseSchema,
+  CreateChecklistResponseSchema,
+  CreateChecklistItemResponseSchema,
+  UpdateChecklistItemResponseSchema,
+  DeleteResponseSchema,
+} from "./dtos/responses/checklist.response";
 
 export const checklistRegistry = new OpenAPIRegistry();
 
@@ -20,31 +27,7 @@ checklistRegistry.registerPath({
     }),
   },
   responses: createApiResponse(
-    z.object({
-      status: z.string(),
-      data: z.object({
-        checklists: z.array(
-          z.object({
-            id: z.string(),
-            name: z.string(),
-            cardId: z.string(),
-            createdAt: z.date(),
-            updatedAt: z.date(),
-            items: z.array(
-              z.object({
-                id: z.string(),
-                name: z.string(),
-                isComplete: z.boolean(),
-                position: z.number(),
-                checklistId: z.string(),
-                createdAt: z.date(),
-                updatedAt: z.date(),
-              })
-            ),
-          })
-        ),
-      }),
-    }),
+    GetChecklistsResponseSchema,
     "Get all checklists of a card"
   ),
 });
@@ -67,19 +50,7 @@ checklistRegistry.registerPath({
     },
   },
   responses: createApiResponse(
-    z.object({
-      status: z.string(),
-      data: z.object({
-        checklist: z.object({
-          id: z.string(),
-          name: z.string(),
-          cardId: z.string(),
-          createdAt: z.date(),
-          updatedAt: z.date(),
-          items: z.array(z.any()),
-        }),
-      }),
-    }),
+    CreateChecklistResponseSchema,
     "Create a new checklist"
   ),
 });
@@ -96,10 +67,7 @@ checklistRegistry.registerPath({
     }),
   },
   responses: createApiResponse(
-    z.object({
-      status: z.string(),
-      message: z.string(),
-    }),
+    DeleteResponseSchema,
     "Delete a checklist"
   ),
 });
@@ -123,20 +91,7 @@ checklistRegistry.registerPath({
     },
   },
   responses: createApiResponse(
-    z.object({
-      status: z.string(),
-      data: z.object({
-        item: z.object({
-          id: z.string(),
-          name: z.string(),
-          isComplete: z.boolean(),
-          position: z.number(),
-          checklistId: z.string(),
-          createdAt: z.date(),
-          updatedAt: z.date(),
-        }),
-      }),
-    }),
+    CreateChecklistItemResponseSchema,
     "Create a new checklist item"
   ),
 });
@@ -161,20 +116,7 @@ checklistRegistry.registerPath({
     },
   },
   responses: createApiResponse(
-    z.object({
-      status: z.string(),
-      data: z.object({
-        item: z.object({
-          id: z.string(),
-          name: z.string(),
-          isComplete: z.boolean(),
-          position: z.number(),
-          checklistId: z.string(),
-          createdAt: z.date(),
-          updatedAt: z.date(),
-        }),
-      }),
-    }),
+    UpdateChecklistItemResponseSchema,
     "Update a checklist item"
   ),
 });
@@ -192,10 +134,7 @@ checklistRegistry.registerPath({
     }),
   },
   responses: createApiResponse(
-    z.object({
-      status: z.string(),
-      message: z.string(),
-    }),
+    DeleteResponseSchema,
     "Delete a checklist item"
   ),
 });
