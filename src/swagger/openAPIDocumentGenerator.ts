@@ -13,6 +13,7 @@ import { cardMemberRegistry } from "@/modules/card-member/cardMember.route";
 import { listRegistry } from "@/modules/list/list.route";
 import { cardRegistry } from "@/modules/card/card.route";
 import { labelRegistry } from "@/modules/label/label.route";
+import { checklistRegistry } from "@/modules/checklist/checklist.route";
 
 import { joinLinkRegistry } from "@/modules/join-link/joinlink.route";
 
@@ -24,7 +25,8 @@ export function generateOpenAPIDocument() {
         [authRegistry, healthCheckRegistry, userRegistry, 
         workspaceRegistry, workspaceJoinLinkRegistry, memberWorkspaceRegistry, 
         boardRegistry, boardJoinLinkRegistry, memberBoardRegistry,
-        listRegistry, cardRegistry, labelRegistry, cardMemberRegistry, joinLinkRegistry, templateRegistry]
+        listRegistry, cardRegistry, labelRegistry, cardMemberRegistry, 
+        checklistRegistry, joinLinkRegistry, templateRegistry]
     );
     const generator = new OpenApiGeneratorV3(registry.definitions)
 

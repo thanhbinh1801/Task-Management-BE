@@ -65,6 +65,8 @@ import CardMemberController from "@/modules/card-member/cardMember.controller";
 import { CardMemberService } from "@/modules/card-member/cardMember.service";
 import { CardMemberPrismaRepository } from "@/modules/card-member/repository/prisma/CardMemberPrismaRepository";
 
+import { initChecklistRouter } from "@/modules/checklist";
+
 import JoinLinkRouter from "@/modules/join-link/joinlink.route";
 import JoinLinkController from "@/modules/join-link/joinlink.controller";
 import JoinLinkService from "@/modules/join-link/joinlink.service";
@@ -164,6 +166,8 @@ const initWorkspaceRouter = () => {
   const cardMemberService = new CardMemberService(cardMemberRepository);
   const cardMemberController = new CardMemberController(cardMemberService);
   const cardMemberRouter = CardMemberRouter(cardMemberController, cardMemberService);
+
+  const checklistRouter = initChecklistRouter();
   
   //workspace router dependencies
   const workspaceJoinLinkRepository = new WorkspaceJoinLinkRepository();
@@ -183,6 +187,7 @@ const initWorkspaceRouter = () => {
 
   mainRouter.use("/workspace", WorkspaceRouter(workspaceController, workspaceJoinLinkRouter, memberWorkspaceRouter, boardRouter));
   mainRouter.use("/card", cardMemberRouter);
+  mainRouter.use("/card", checklistRouter);
 }
 
 const initjoinLinkRouter = () => {

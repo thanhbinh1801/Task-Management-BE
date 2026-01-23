@@ -1,4 +1,5 @@
 import { prisma } from "../configs/prisma";
+import bcrypt from "bcryptjs";
 
 async function main() {
   await prisma.permission.createMany({
@@ -393,5 +394,242 @@ async function main() {
   });
 
   console.log("System templates seeded successfully!");
-  //test card member data
+
+  // ========================================
+  // TEST DATA FOR CHECKLIST MANAGEMENT
+  // ========================================
+  console.log("\nStarting Checklist test data seed...");
+
+  // Create test user with account
+  const testUser = await prisma.user.upsert({
+    where: { email: "test@checklist.com" },
+    update: {},
+    create: {
+      email: "test@checklist.com",
+      name: "Test User",
+      status: "ACTIVE",
+    },
+  });
+
+  const passwordHash = await bcrypt.hash("Test123!", 10);
+  await prisma.account.upsert({
+    where: { userId: testUser.id },
+    update: { passwordHash },
+    create: {
+      userId: testUser.id,
+      passwordHash,
+    },
+  });
+
+  // Create test workspace
+  const testWorkspace = await prisma.workspace.upsert({
+    where: { id: "test-workspace-1" },
+    update: {},
+    create: {
+      id: "test-workspace-1",
+      name: "Test Workspace",
+      visibility: "PRIVATE",
+    },
+  });
+
+  // Add user to workspace with Owner role
+  const ownerWorkspaceRole = await prisma.role.findFirst({
+    where: { roleName: "OwnerWorkspace" },
+  });
+
+  await prisma.workspaceMember.upsert({
+    where: {
+      userId_workspaceId: {
+        userId: testUser.id,
+        workspaceId: testWorkspace.id,
+      },
+    },
+    update: {},
+    create: {
+      userId: testUser.id,
+      workspaceId: testWorkspace.id,
+      roleId: ownerWorkspaceRole!.id,
+    },
+  });
+
+  // Create test board
+  const testBoard = await prisma.board.upsert({
+    where: { id: "test-board-1" },
+    update: {},
+    create: {
+      id: "test-board-1",
+      name: "Test Board",
+      workspaceId: testWorkspace.id,
+      isTemplate: false,
+    },
+  });
+
+  // Add user to board with Owner role
+  const ownerBoardRole = await prisma.role.findFirst({
+    where: { roleName: "OwnerBoard" },
+  });
+
+  await prisma.boardMember.upsert({
+    where: {
+      userId_boardId: {
+        userId: testUser.id,
+        boardId: testBoard.id,
+      },
+    },
+    update: {},
+    create: {
+      userId: testUser.id,
+      boardId: testBoard.id,
+      roleId: ownerBoardRole!.id,
+    },
+  });
+
+  // Create test list
+  const testList = await prisma.list.upsert({
+    where: { id: "test-list-1" },
+    update: {},
+    create: {
+      id: "test-list-1",
+      name: "To Do",
+      boardId: testBoard.id,
+      position: 1,
+    },
+  });
+
+  // Create test cards
+  const testCard1 = await prisma.card.upsert({
+    where: { id: "test-card-1" },
+    update: {},
+    create: {
+      id: "test-card-1",
+      name: "Feature: User Authentication",
+      listId: testList.id,
+      position: 1,
+      isComplete: false,
+    },
+  });
+
+  const testCard2 = await prisma.card.upsert({
+    where: { id: "test-card-2" },
+    update: {},
+    create: {
+      id: "test-card-2",
+      name: "Bug Fix: Login Issue",
+      listId: testList.id,
+      position: 2,
+      isComplete: false,
+    },
+  });
+
+  // Create checklists for Card 1
+  const checklist1 = await prisma.checklist.upsert({
+    where: { id: "checklist-1" },
+    update: {},
+    create: {
+      id: "checklist-1",
+      name: "Backend Tasks",
+      cardId: testCard1.id,
+    },
+  });
+
+  const checklist2 = await prisma.checklist.upsert({
+    where: { id: "checklist-2" },
+    update: {},
+    create: {
+      id: "checklist-2",
+      name: "Frontend Tasks",
+      cardId: testCard1.id,
+    },
+  });
+
+  // Create checklist items for Backend checklist
+  await prisma.checklistItem.upsert({
+    where: { id: "item-1" },
+    update: {},
+    create: {
+      id: "item-1",
+      name: "Setup database schema",
+      isComplete: true,
+      position: 1,
+      checklistId: checklist1.id,
+    },
+  });
+
+  await prisma.checklistItem.upsert({
+    where: { id: "item-2" },
+    update: {},
+    create: {
+      id: "item-2",
+      name: "Create API endpoints",
+      isComplete: true,
+      position: 2,
+      checklistId: checklist1.id,
+    },
+  });
+
+  await prisma.checklistItem.upsert({
+    where: { id: "item-3" },
+    update: {},
+    create: {
+      id: "item-3",
+      name: "Write unit tests",
+      isComplete: false,
+      position: 3,
+      checklistId: checklist1.id,
+    },
+  });
+
+  // Create checklist items for Frontend checklist
+  await prisma.checklistItem.upsert({
+    where: { id: "item-4" },
+    update: {},
+    create: {
+      id: "item-4",
+      name: "Design login page",
+      isComplete: false,
+      position: 1,
+      checklistId: checklist2.id,
+    },
+  });
+
+  await prisma.checklistItem.upsert({
+    where: { id: "item-5" },
+    update: {},
+    create: {
+      id: "item-5",
+      name: "Implement authentication flow",
+      isComplete: false,
+      position: 2,
+      checklistId: checklist2.id,
+    },
+  });
+
+  console.log("\n===========================================");
+  console.log("TEST DATA CREATED SUCCESSFULLY!");
+  console.log("===========================================");
+  console.log("\nLOGIN CREDENTIALS:");
+  console.log("  Email:    test@checklist.com");
+  console.log("  Password: Test123!");
+  console.log("\nTEST IDs FOR SWAGGER:");
+  console.log(`  Card 1:      ${testCard1.id} (has 2 checklists)`);
+  console.log(`  Card 2:      ${testCard2.id} (no checklists)`);
+  console.log(`  Checklist 1: ${checklist1.id} (Backend Tasks - 3 items)`);
+  console.log(`  Checklist 2: ${checklist2.id} (Frontend Tasks - 2 items)`);
+  console.log("\nQUICK START:");
+  console.log("  1. npm run dev");
+  console.log("  2. Open: http://localhost:8000/api-docs");
+  console.log("  3. POST /api/v1/auth/login with above credentials");
+  console.log("  4. Copy the token from response");
+  console.log("  5. Click 'Authorize' button, paste: Bearer <your-token>");
+  console.log("  6. Test Checklist APIs with cardId: test-card-1");
+  console.log("===========================================\n");
 }
+
+main()
+  .catch((e) => {
+    console.error("Error seeding database:", e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
