@@ -393,4 +393,5 @@ async function main() {
   });
 
   console.log("System templates seeded successfully!");
+  //test card member data
 }

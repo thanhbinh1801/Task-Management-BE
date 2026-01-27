@@ -107,7 +107,7 @@ export function BoardRouter(
   boardJoinLinkRouter: Router,
   listRouter: Router,
   boardLabelRouter: Router,
-  cardLabelRouter: Router,
+  cardLabelRouter: Router
 ) : Router 
   {
   const boardRouter = Router({ mergeParams: true });

@@ -60,6 +60,13 @@ import LabelController from "@/modules/label/label.controller";
 import { LabelService } from "@/modules/label/label.service";
 import { LabelPrismaRepository } from "@/modules/label/repository/prisma/LabelPrismaRepository";
 
+import { CardMemberRouter } from "@/modules/card-member/cardMember.route";
+import CardMemberController from "@/modules/card-member/cardMember.controller";
+import { CardMemberService } from "@/modules/card-member/cardMember.service";
+import { CardMemberPrismaRepository } from "@/modules/card-member/repository/prisma/CardMemberPrismaRepository";
+
+import { initChecklistRouter } from "@/modules/checklist";
+
 import JoinLinkRouter from "@/modules/join-link/joinlink.route";
 import JoinLinkController from "@/modules/join-link/joinlink.controller";
 import JoinLinkService from "@/modules/join-link/joinlink.service";
@@ -132,7 +139,14 @@ const initBoardRouter = () => {
   const boardRepository = new BoardPrismaRepository();
   const boardService = new BoardService(boardRepository, templateRepository);
   const boardController = new BoardController(boardService);
-  const boardRouter = BoardRouter(boardController, memberBoardRouter, boardJoinLinkRouter, listRouter, boardLabelRouter, cardLabelRouter);
+  const boardRouter = BoardRouter(
+    boardController,
+    memberBoardRouter,
+    boardJoinLinkRouter,
+    listRouter,
+    boardLabelRouter,
+    cardLabelRouter,
+  );
 
   return boardRouter;
 }
@@ -147,6 +161,13 @@ const initTemplateRouter = () => {
 
 const initWorkspaceRouter = () => {
   const boardRouter = initBoardRouter();
+
+  const cardMemberRepository = new CardMemberPrismaRepository();
+  const cardMemberService = new CardMemberService(cardMemberRepository);
+  const cardMemberController = new CardMemberController(cardMemberService);
+  const cardMemberRouter = CardMemberRouter(cardMemberController, cardMemberService);
+
+  const checklistRouter = initChecklistRouter();
   
   //workspace router dependencies
   const workspaceJoinLinkRepository = new WorkspaceJoinLinkRepository();
@@ -165,6 +186,8 @@ const initWorkspaceRouter = () => {
 
 
   mainRouter.use("/workspace", WorkspaceRouter(workspaceController, workspaceJoinLinkRouter, memberWorkspaceRouter, boardRouter));
+  mainRouter.use("/card", cardMemberRouter);
+  mainRouter.use("/card", checklistRouter);
 }
 
 const initjoinLinkRouter = () => {
