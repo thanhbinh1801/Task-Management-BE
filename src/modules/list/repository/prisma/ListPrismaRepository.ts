@@ -7,9 +7,9 @@ import { ListResponse } from "../../dtos/responses/list.response"
 
 
 export class ListPrismaRepository implements IListRepository {
-  async findLists(boardId: string): Promise<ListResponse[]> {
+  async findLists(): Promise<ListResponse[]> {
     const lists = await prisma.list.findMany({
-      where: { boardId: boardId, deletedAt: null},
+      where: { deletedAt: null},
       orderBy: { position: 'asc' }, 
       include: {
         Card: { where: { deletedAt: null }}
@@ -61,11 +61,11 @@ export class ListPrismaRepository implements IListRepository {
     };
   }
 
-  async createList(listData: ListCreateRequest, boardId: string, position: number): Promise<List> {
+  async createList(listData: ListCreateRequest, position: number): Promise<List> {
     return prisma.list.create({
       data: {
         name: listData.nameList,
-        boardId: boardId,
+        boardId: listData.boardId,
         position: new Prisma.Decimal(position),
       },
     });

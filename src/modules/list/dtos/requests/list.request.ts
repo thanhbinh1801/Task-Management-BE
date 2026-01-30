@@ -2,6 +2,7 @@ import z from "zod"
 
 export const ListCreateRequestSchema = z.object({
   nameList: z.string(),
+  boardId: z.string(),
 });
 
 export type ListCreateRequest = z.infer<typeof ListCreateRequestSchema>;

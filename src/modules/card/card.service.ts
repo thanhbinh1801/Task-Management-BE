@@ -6,11 +6,12 @@ import { redisService } from "@/modules/redis/redis.service";
 import { boardKey } from "@/modules/board/board.service";
 
 const cardPerListKey = (listId: string) => `card:list:${listId}`;
+const cardPerBoardKey = (boardId: string) => `card:board:${boardId}`;
 export const cardKey = (cardId: string) => `card:${cardId}`;
 const CARD_TTL_SECONDS = 300; // 5 minutes
 
 export class CardService {
-  constructor( private readonly cardRepo: ICardRepository){}
+  constructor(private readonly cardRepo: ICardRepository) { }
 
   async getCards(listId: string): Promise<Card[]> {
     const cacheKey = cardPerListKey(listId);
@@ -22,7 +23,7 @@ export class CardService {
     }
 
     const cards = await this.cardRepo.findCards(listId);
-    if(cards.length === 0) {
+    if (cards.length === 0) {
       throw new NotFoundException("Lists not found");
     }
 
@@ -32,7 +33,7 @@ export class CardService {
       console.error('card list cache set error', err);
     }
     return cards;
-  } 
+  }
 
   async getCardById(cardId: string): Promise<Card | null> {
     const cacheKey = cardKey(cardId);
@@ -44,7 +45,7 @@ export class CardService {
     }
 
     const card = await this.cardRepo.findCardById(cardId);
-    if(!card) {
+    if (!card) {
       throw new NotFoundException("Card not found");
     }
 
@@ -59,28 +60,29 @@ export class CardService {
   async createCard(cardData: CardCreateRequest, listId: string): Promise<Card> {
     const position = await this.cardRepo.findMaxPositionOfCardInList(listId) + 1000;
     const newCard = await this.cardRepo.createCard(cardData, listId, position);
-    if(!newCard) {
+    if (!newCard) {
       throw new InternalServerException("can not create card");
     }
     try {
       await redisService.del(cardPerListKey(listId));
+      await redisService.del(cardPerBoardKey(cardData.boardId));
+      await redisService.del(boardKey(cardData.boardId));
     } catch (err) {
       console.error('card list cache clear error', err);
     }
     return newCard;
   }
 
-  async updateCard(cardData: CardUpdateRequest, listId: string, boardId: string): Promise<Card> {
+  async updateCard(cardData: CardUpdateRequest, listId: string): Promise<Card> {
     const updatedCard = await this.cardRepo.updateCard(cardData);
-    if(!updatedCard) {
+    if (!updatedCard) {
       throw new InternalServerException("can not update card");
     }
     try {
       await redisService.del(cardKey(updatedCard.id));
-      await redisService.del(cardPerListKey(listId)); // List cũ
-      await redisService.del(boardKey(boardId)); // Board cache
-      
-      // Nếu move card sang list khác, xóa cache list mới
+      await redisService.del(cardPerListKey(listId));
+      await redisService.del(boardKey(cardData.boardId));
+
       if (cardData.listIdTarget && cardData.listIdTarget !== listId) {
         await redisService.del(cardPerListKey(cardData.listIdTarget));
       }
@@ -92,7 +94,7 @@ export class CardService {
 
   async deleteCard(cardId: string): Promise<void> {
     const isDelete = await this.cardRepo.deleteCard(cardId);
-    if(!isDelete) {
+    if (!isDelete) {
       throw new InternalServerException('can not delete card');
     }
     try {

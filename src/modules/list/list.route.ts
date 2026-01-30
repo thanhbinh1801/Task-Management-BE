@@ -8,28 +8,20 @@ import z from "zod";
 export const listRegistry = new OpenAPIRegistry();
 
 listRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list',
+  path: '/api/v1/list',
   method: "get",
   tags: ["List"],
   security: [{ bearerAuth: [] }],
-  request: {
-    params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
-    })
-  },
   responses: createApiResponse(z.null(), "Success"),
 });
 
 listRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list/{listId}',
+  path: '/api/v1/list/{listId}',
   method: "get",
   tags: ["List"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       listId: z.string(),
     })
   },
@@ -37,22 +29,20 @@ listRegistry.registerPath({
 });
 
 listRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list',
+  path: '/api/v1/list',
   method: "post",
   tags: ["List"],
   security: [{ bearerAuth: [] }],
   request: {
-    params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
-    }),
     body: {
       content: {
         "application/json": {
           schema: z.object({
+            boardId: z.string(),
             name: z.string(),
           }),
           example: {
+            boardId: "boardId",
             nameList: "To Do",
           },
         },
@@ -63,24 +53,24 @@ listRegistry.registerPath({
 });
 
 listRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list/{listId}',
+  path: '/api/v1/list/{listId}',
   method: "put",
   tags: ["List"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       listId: z.string(),
     }),
     body: {
       content: {
         "application/json": {
           schema: z.object({
+            boardId: z.string(),
             name: z.string().optional(),
             position: z.number().optional(),
           }),
           example: {
+            boardId: "boardId",
             nameList: "In Progress",
             position: 1000
           },
@@ -92,14 +82,12 @@ listRegistry.registerPath({
 });
 
 listRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list/{listId}',
+  path: '/api/v1/list/{listId}',
   method: "delete",
   tags: ["List"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       listId: z.string(),
     }),
     query: z.object({
@@ -109,25 +97,24 @@ listRegistry.registerPath({
   responses: createApiResponse(z.null(), "Success"),
 });
 
-export function ListRouter( 
-  listController: ListController, 
+export function ListRouter(
+  listController: ListController,
   cardRouter: Router
-) : Router 
-  {
-  const listRouter = Router({ mergeParams: true });
+): Router {
+  const listRouter = Router();
 
-  listRouter.get('/', asyncHandler(authenticate()), authorize(['VIEW_LIST'], "board"),
-                      asyncHandler(listController.getLists));
-  listRouter.get('/:listId', asyncHandler(authenticate()), authorize(['VIEW_LIST'], "board"),
-                      asyncHandler(listController.getListById));
-  listRouter.post('/', asyncHandler(authenticate()), authorize(['CREATE_LIST'], "board"),
-                      asyncHandler(listController.createList));
-  listRouter.put('/:listId', asyncHandler(authenticate()), authorize(['UPDATE_LIST'], "board"),
-                      asyncHandler(listController.updateList));
-  listRouter.delete('/:listId', asyncHandler(authenticate()), authorize(['DELETE_LIST'], "board"),
-                      asyncHandler(listController.deleteList));
+  listRouter.get('/', asyncHandler(authenticate()), authorize(['VIEW_LIST'], "global"),
+    asyncHandler(listController.getLists));
+  listRouter.get('/:listId', asyncHandler(authenticate()), authorize(['VIEW_LIST'], "global"),
+    asyncHandler(listController.getListById));
+  listRouter.post('/', asyncHandler(authenticate()), authorize(['CREATE_LIST'], "global"),
+    asyncHandler(listController.createList));
+  listRouter.put('/:listId', asyncHandler(authenticate()), authorize(['UPDATE_LIST'], "global"),
+    asyncHandler(listController.updateList));
+  listRouter.delete('/:listId', asyncHandler(authenticate()), authorize(['DELETE_LIST'], "global"),
+    asyncHandler(listController.deleteList));
 
   listRouter.use('/:listId/card', cardRouter);
-  
+
   return listRouter;
 }
