@@ -37,8 +37,8 @@ export default class ListController {
 
   createList = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { nameList, boardId } = ListCreateRequestSchema.parse(req.body);
-      const listData = { nameList, boardId }
+      const { name, boardId } = ListCreateRequestSchema.parse(req.body);
+      const listData = { nameList: name, boardId }
       const newList = await this.listService.createList(listData);
       res.status(201).json({
         status: "success",
