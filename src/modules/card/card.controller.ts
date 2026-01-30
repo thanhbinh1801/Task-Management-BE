@@ -50,8 +50,8 @@ export default class CardController {
         throw new BadRequestException("listId not found");
       }
 
-      const { boardId, nameCard } = CardCreateRequestSchema.parse(req.body);
-      const cardData = { boardId, nameCard }
+      const { boardId, name } = CardCreateRequestSchema.parse(req.body);
+      const cardData = { boardId, nameCard: name }
       const newCard = await this.cardService.createCard(cardData, listId);
       res.status(201).json({
         status: "success",
@@ -76,12 +76,15 @@ export default class CardController {
       const cardData = CardUpdateRequestSchema.parse({
         cardId: cardId,
         boardId: req.body.boardId,
-        nameCard: req.body?.nameCard,
+        name: req.body?.name,
         listIdTarget: req.body?.listIdTarget,
         position: req.body?.position,
       });
 
-      const updatedCard = await this.cardService.updateCard(cardData, listId);
+      const updatedCard = await this.cardService.updateCard({
+        ...cardData,
+        nameCard: cardData.name
+      }, listId);
       res.status(200).json({
         status: "success",
         message: "update card successfully",
