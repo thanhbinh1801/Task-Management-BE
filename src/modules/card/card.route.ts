@@ -8,14 +8,12 @@ import z from "zod";
 export const cardRegistry = new OpenAPIRegistry();
 
 cardRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list/{listId}/card',
+  path: '/api/v1/list/{listId}/card',
   method: "get",
   tags: ["Card"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       listId: z.string(),
     })
   },
@@ -23,14 +21,12 @@ cardRegistry.registerPath({
 });
 
 cardRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list/{listId}/card/{cardId}',
+  path: '/api/v1/list/{listId}/card/{cardId}',
   method: "get",
   tags: ["Card"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       listId: z.string(),
       cardId: z.string(),
     })
@@ -39,23 +35,23 @@ cardRegistry.registerPath({
 });
 
 cardRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list/{listId}/card',
+  path: '/api/v1/list/{listId}/card',
   method: "post",
   tags: ["Card"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       listId: z.string()
     }),
     body: {
       content: {
         "application/json": {
           schema: z.object({
+            boardId: z.string(),
             name: z.string(),
           }),
           example: {
+            boardId: "boardId",
             nameCard: "Card 1",
           },
         },
@@ -66,14 +62,12 @@ cardRegistry.registerPath({
 });
 
 cardRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list/{listId}/card/{cardId}',
+  path: '/api/v1/list/{listId}/card/{cardId}',
   method: "put",
   tags: ["Card"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       listId: z.string(),
       cardId: z.string(),
     }),
@@ -81,11 +75,13 @@ cardRegistry.registerPath({
       content: {
         "application/json": {
           schema: z.object({
+            boardId: z.string(),
             name: z.string(),
             listIdTarget: z.string(),
             position: z.number(),
           }),
           example: {
+            boardId: "boardId",
             nameCard: "Card 1 Updated",
             listIdTarget: "listIdTarget",
             position: 1000,
@@ -98,14 +94,12 @@ cardRegistry.registerPath({
 });
 
 cardRegistry.registerPath({
-  path: '/api/v1/workspace/{workspaceId}/board/{boardId}/list/{listId}/card/{cardId}',
+  path: '/api/v1/list/{listId}/card/{cardId}',
   method: "delete",
   tags: ["Card"],
   security: [{ bearerAuth: [] }],
   request: {
     params: z.object({
-      workspaceId: z.string(),
-      boardId: z.string(),
       listId: z.string(),
       cardId: z.string(),
     }),
@@ -116,21 +110,27 @@ cardRegistry.registerPath({
   responses: createApiResponse(z.null(), "Success"),
 });
 
-export function CardRouter( 
-  cardController: CardController, ) : Router 
-  {
+export function CardRouter(
+  cardController: CardController,
+  cardMemberRouter: Router,
+  cardLabelRouter: Router,
+  checklistRouter: Router,
+): Router {
   const cardRouter = Router({ mergeParams: true });
 
-  cardRouter.get('/', asyncHandler(authenticate()), authorize(['VIEW_CARD'], "board"),
-                      asyncHandler(cardController.getCards));
-  cardRouter.get('/:cardId', asyncHandler(authenticate()), authorize(['VIEW_CARD'], "board"),
-                      asyncHandler(cardController.getCardById));
-  cardRouter.post('/', asyncHandler(authenticate()), authorize(['CREATE_CARD'], "board"),
-                      asyncHandler(cardController.createCard));
-  cardRouter.put('/:cardId', asyncHandler(authenticate()), authorize(['UPDATE_CARD'], "board"),
-                      asyncHandler(cardController.updateCard));
-  cardRouter.delete('/:cardId', asyncHandler(authenticate()), authorize(['DELETE_CARD'], "board"),
-                      asyncHandler(cardController.deleteCard));
+  cardRouter.get('/', asyncHandler(authenticate()), authorize(['VIEW_CARD'], "global"),
+    asyncHandler(cardController.getCards));
+  cardRouter.get('/:cardId', asyncHandler(authenticate()), authorize(['VIEW_CARD'], "global"),
+    asyncHandler(cardController.getCardById));
+  cardRouter.post('/', asyncHandler(authenticate()), authorize(['CREATE_CARD'], "global"),
+    asyncHandler(cardController.createCard));
+  cardRouter.put('/:cardId', asyncHandler(authenticate()), authorize(['UPDATE_CARD'], "global"),
+    asyncHandler(cardController.updateCard));
+  cardRouter.delete('/:cardId', asyncHandler(authenticate()), authorize(['DELETE_CARD'], "global"),
+    asyncHandler(cardController.deleteCard));
 
+  cardRouter.use("/:cardId/member", cardMemberRouter);
+  cardRouter.use("/:cardId/label", cardLabelRouter);
+  cardRouter.use("/:cardId/checklist", checklistRouter);
   return cardRouter;
 }

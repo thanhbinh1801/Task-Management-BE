@@ -1,15 +1,15 @@
 import { BadRequestException } from "@/commons";
-import {Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { BoardCreateRequestSchema, BoardUpdateRequestSchema } from "./dtos/requests/board.request";
 import { BoardService } from "./board.service";
 
 export default class BoardController {
-  constructor( private readonly boardService : BoardService){}
+  constructor(private readonly boardService: BoardService) { }
 
   getBoards = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const workspaceId = req.params.workspaceId;
-      if(!workspaceId) {
+      if (!workspaceId) {
         throw new BadRequestException("workspaceId not found");
       }
       const boards = await this.boardService.getBoards(workspaceId);
@@ -18,8 +18,8 @@ export default class BoardController {
         message: "get board successfully",
         data: boards
       });
-    } 
-    catch(err){
+    }
+    catch (err) {
       next(err);
     }
   }
@@ -27,7 +27,7 @@ export default class BoardController {
   getBoardById = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const boardId = req.params.boardId;
-      if(!boardId) {
+      if (!boardId) {
         throw new BadRequestException("boardId not found");
       }
       const board = await this.boardService.getBoardById(boardId);
@@ -36,8 +36,8 @@ export default class BoardController {
         message: "get board by id successfully",
         data: board
       });
-    } 
-    catch(err){
+    }
+    catch (err) {
       next(err);
     }
   }
@@ -45,11 +45,11 @@ export default class BoardController {
   createBoard = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const workspaceId = req.params.workspaceId;
-      if(!workspaceId) {
+      if (!workspaceId) {
         throw new BadRequestException("workspaceId not found");
       }
       const userId = req.users?.userId;
-      if(!userId) {
+      if (!userId) {
         throw new BadRequestException("userId not found");
       }
 
@@ -61,8 +61,8 @@ export default class BoardController {
         message: "create board successfully",
         data: newBoard
       });
-    } 
-    catch(err){
+    }
+    catch (err) {
       next(err);
     }
   }
@@ -70,19 +70,19 @@ export default class BoardController {
   updateBoard = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const workspaceId = req.params.workspaceId;
-      if(!workspaceId) {
+      if (!workspaceId) {
         throw new BadRequestException("workspaceId not found");
       }
       const boardId = req.params.boardId;
-      if(!boardId) {
+      if (!boardId) {
         throw new BadRequestException("boardId not found");
       }
 
       const boardData = BoardUpdateRequestSchema.parse({
-      workspaceId: req.params.workspaceId,
-      boardId: req.params.boardId,
-      nameBoard: req.body?.nameBoard,
-    });
+        workspaceId: req.params.workspaceId,
+        boardId: req.params.boardId,
+        nameBoard: req.body?.nameBoard,
+      });
 
       const updatedBoard = await this.boardService.updateBoard(boardData);
       res.status(200).json({
@@ -90,8 +90,8 @@ export default class BoardController {
         message: "update board successfully",
         data: updatedBoard
       });
-    } 
-    catch(err){
+    }
+    catch (err) {
       next(err);
     }
   }
@@ -99,29 +99,29 @@ export default class BoardController {
   deleteBoard = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const boardId = req.params.boardId;
-      if(!boardId) {
+      if (!boardId) {
         throw new BadRequestException("boardId not found");
       }
-      
+
       // Check if permanent delete is requested via query parameter
       const isPermanent = req.query.permanent === 'true';
       const userId = req.users?.userId;
-      if(!userId) {
+      if (!userId) {
         throw new BadRequestException("userId not found");
       }
-      
+
       if (isPermanent) {
         await this.boardService.hardDeleteBoard(boardId, userId);
       } else {
         await this.boardService.deleteBoard(boardId, userId);
       }
-      
+
       res.status(200).json({
         status: "success",
         message: isPermanent ? "permanently deleted board successfully" : "soft deleted board successfully",
       });
-    } 
-    catch(err){
+    }
+    catch (err) {
       next(err);
     }
   }

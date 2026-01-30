@@ -1,17 +1,11 @@
-export interface CardResponse {
-  id: string,
-  name: string,
-  isComplete: boolean,
-  createAt: Date,
-  updateAt: Date
-}
+import { CardResponse } from "@/modules/card/dtos/responses/card.response";
 
 export interface ListResponse {
-  id: string,           // ← Thêm id
+  id: string,          
   name: string,
   position: number,
   boardId: string,
   createAt: Date,
   updateAt: Date,
-  cards: CardResponse[] // ← Sửa thành array
+  cards: CardResponse[] 
 }

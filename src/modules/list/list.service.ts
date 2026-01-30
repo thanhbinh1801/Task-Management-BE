@@ -13,59 +13,31 @@ const listKey = (listId: string) => `list:${listId}`;
 export class ListService {
   constructor( private readonly listRepo: IListRepository){}
 
-  async getLists(boardId: string): Promise<ListResponse[]> {
-    const cacheKey = listPerBoardKey(boardId);
-    try {
-      const cached = await redisService.get<ListResponse[]>(cacheKey);
-      if (cached) return cached;
-    } catch (err) {
-      console.error('list cache get error', err);
-    }
-
-    const lists = await this.listRepo.findLists(boardId);
+  async getLists(): Promise<ListResponse[]> {
+    const lists = await this.listRepo.findLists();
     if(lists.length === 0) {
       throw new NotFoundException("Lists not found");
-    }
-
-    try {
-      await redisService.set(cacheKey, lists);
-    } catch (err) {
-      console.error('list cache set error', err);
     }
     return lists;
   } 
 
   async getListById(listId: string): Promise<ListResponse | null> {
-    const cacheKey = listKey(listId);
-    try {
-      const cached = await redisService.get<ListResponse>(cacheKey);
-      if (cached) return cached;
-    } catch (err) {
-      console.error('list detail cache get error', err);
-    }
-
     const list = await this.listRepo.findListById(listId);
     if(!list) {
       throw new NotFoundException("List not found");
     }
-
-    try {
-      await redisService.set(cacheKey, list);
-    } catch (err) {
-      console.error('list detail cache set error', err);
-    }
     return list;
   }
 
-  async createList(listData: ListCreateRequest, boardId: string): Promise<List> {
-    const position = await this.listRepo.findMaxPositionOfList(boardId) + 1000;
-    const newList = await this.listRepo.createList(listData, boardId, position);
+  async createList(listData: ListCreateRequest): Promise<List> {
+    const position = await this.listRepo.findMaxPositionOfList(listData.boardId) + 1000;
+    const newList = await this.listRepo.createList(listData, position);
     if(!newList) {
       throw new InternalServerException("can not create list");
     }
     try {
-      await redisService.del(listPerBoardKey(boardId));
-      await redisService.del(boardKey(boardId));
+      await redisService.del(listPerBoardKey(listData.boardId));
+      await redisService.del(boardKey(listData.boardId));
     } catch (err) {
       console.error('list cache clear error', err);
     }

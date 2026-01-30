@@ -8,7 +8,7 @@ import { GoogleStrategy } from "@/modules/auth/google.strategy";
 
 import { UserRouter } from "@/modules/user/user.route";
 import UserController from "@/modules/user/user.controller";
-import UserService from "@/modules/user/user.service"; 
+import UserService from "@/modules/user/user.service";
 
 import { WorkspaceRouter } from "@/modules/workspace/workspace.route";
 import WorkspaceController from "@/modules/workspace/workspace.controller";
@@ -73,6 +73,7 @@ import JoinLinkService from "@/modules/join-link/joinlink.service";
 import JoinLinkRepository from "@/modules/join-link/repositories/prisma/JoinLinkPrismaRepository";
 
 
+
 const mainRouter = Router();
 
 const initAuthRouter = () => {
@@ -85,7 +86,7 @@ const initAuthRouter = () => {
   const authService = new AuthService(userService, accountPrismaRepository, socialAccountsPrismaRepository, tokenPrismaRepository, otpPrismaRepository);
   const authController = new AuthController(authService);
   new GoogleStrategy();
-  
+
   mainRouter.use("/auth", AuthRouter(authController));
 }
 
@@ -97,33 +98,47 @@ const initUserRouter = () => {
   mainRouter.use("/user", UserRouter(userController));
 }
 
-const initCardRouter = () => {
-  const cardRepository = new CardPrismaRepository();
-  const cardService = new CardService(cardRepository);
-  const cardController = new CardController(cardService);
-
-  return CardRouter(cardController);
-}
-
-const initListRouter = () => {
-  const cardRouter = initCardRouter();
-  
-  const listRepository = new ListPrismaRepository();
-  const listService = new ListService(listRepository);
-  const listController = new ListController(listService);
-  const listRouter = ListRouter(listController, cardRouter);
-
-  return listRouter;
-}
-
-const initBoardRouter = () => {
-  const listRouter = initListRouter();
-
+const initLabelRouter = () => {
   const labelRepository = new LabelPrismaRepository();
   const labelService = new LabelService(labelRepository);
   const labelController = new LabelController(labelService);
   const boardLabelRouter = BoardLabelRouter(labelController);
   const cardLabelRouter = CardLabelRouter(labelController);
+
+  return { boardLabelRouter, cardLabelRouter };
+}
+
+const initCardRouter = () => {
+  const cardRepository = new CardPrismaRepository();
+  const cardService = new CardService(cardRepository);
+  const cardController = new CardController(cardService);
+
+  const cardMemberRepository = new CardMemberPrismaRepository();
+  const cardMemberService = new CardMemberService(cardMemberRepository);
+  const cardMemberController = new CardMemberController(cardMemberService);
+  const cardMemberRouter = CardMemberRouter(cardMemberController, cardMemberService);
+
+  const { cardLabelRouter } = initLabelRouter();
+
+  const checklistRouter = initChecklistRouter();
+
+  return CardRouter(cardController, cardMemberRouter, cardLabelRouter, checklistRouter);
+}
+
+const initListRouter = () => {
+  const cardRouter = initCardRouter();
+
+  const listRepository = new ListPrismaRepository();
+  const listService = new ListService(listRepository);
+  const listController = new ListController(listService);
+  const listRouter = ListRouter(listController, cardRouter);
+
+  mainRouter.use("/list", listRouter);
+}
+
+const initBoardRouter = () => {
+
+  const { boardLabelRouter } = initLabelRouter();
 
   const boardJoinLinkRepository = new BoardJoinLinkRepository();
   const boardJoinLinkService = new BoardJoinLinkService(boardJoinLinkRepository);
@@ -143,9 +158,7 @@ const initBoardRouter = () => {
     boardController,
     memberBoardRouter,
     boardJoinLinkRouter,
-    listRouter,
     boardLabelRouter,
-    cardLabelRouter,
   );
 
   return boardRouter;
@@ -162,13 +175,6 @@ const initTemplateRouter = () => {
 const initWorkspaceRouter = () => {
   const boardRouter = initBoardRouter();
 
-  const cardMemberRepository = new CardMemberPrismaRepository();
-  const cardMemberService = new CardMemberService(cardMemberRepository);
-  const cardMemberController = new CardMemberController(cardMemberService);
-  const cardMemberRouter = CardMemberRouter(cardMemberController, cardMemberService);
-
-  const checklistRouter = initChecklistRouter();
-  
   //workspace router dependencies
   const workspaceJoinLinkRepository = new WorkspaceJoinLinkRepository();
   const workspaceJoinLinkService = new WorkspaceJoinLinkService(workspaceJoinLinkRepository);
@@ -186,8 +192,6 @@ const initWorkspaceRouter = () => {
 
 
   mainRouter.use("/workspace", WorkspaceRouter(workspaceController, workspaceJoinLinkRouter, memberWorkspaceRouter, boardRouter));
-  mainRouter.use("/card", cardMemberRouter);
-  mainRouter.use("/card", checklistRouter);
 }
 
 const initjoinLinkRouter = () => {
@@ -204,6 +208,7 @@ const initjoinLinkRouter = () => {
 
 initAuthRouter();
 initUserRouter();
+initListRouter();
 initTemplateRouter();
 initWorkspaceRouter();
 initjoinLinkRouter();

@@ -19,7 +19,7 @@ boardRegistry.registerPath({
       workspaceId: z.string()
     })
   },
-  responses: createApiResponse(z.null() , "Success"),
+  responses: createApiResponse(z.null(), "Success"),
 });
 
 boardRegistry.registerPath({
@@ -33,7 +33,7 @@ boardRegistry.registerPath({
       boardId: z.string()
     })
   },
-  responses: createApiResponse(z.null() , "Success"),
+  responses: createApiResponse(z.null(), "Success"),
 });
 
 boardRegistry.registerPath({
@@ -56,7 +56,7 @@ boardRegistry.registerPath({
       workspaceId: z.string(),
     }),
   },
-  responses: createApiResponse(z.null() , "Success"),
+  responses: createApiResponse(z.null(), "Success"),
 });
 
 boardRegistry.registerPath({
@@ -69,10 +69,10 @@ boardRegistry.registerPath({
       workspaceId: z.string(),
       boardId: z.string()
     }),
-     body: {
+    body: {
       content: {
         "application/json": {
-          schema: BoardUpdateRequestSchema, 
+          schema: BoardUpdateRequestSchema,
           example: {
             nameBoard: "Board11",
           },
@@ -80,7 +80,7 @@ boardRegistry.registerPath({
       },
     },
   },
-  responses: createApiResponse(z.null() , "Success"),
+  responses: createApiResponse(z.null(), "Success"),
 });
 
 boardRegistry.registerPath({
@@ -97,37 +97,32 @@ boardRegistry.registerPath({
       permanent: z.enum(['true', 'false']).optional().describe('Set to "true" for hard delete, omit or "false" for soft delete')
     })
   },
-  responses: createApiResponse(z.null() , "Success"),
+  responses: createApiResponse(z.null(), "Success"),
 });
 
 
-export function BoardRouter( 
-  boardController: BoardController, 
+export function BoardRouter(
+  boardController: BoardController,
   memberBoardRouter: Router,
   boardJoinLinkRouter: Router,
-  listRouter: Router,
   boardLabelRouter: Router,
-  cardLabelRouter: Router
-) : Router 
-  {
+): Router {
   const boardRouter = Router({ mergeParams: true });
 
-  boardRouter.get('/', asyncHandler(authenticate()),asyncHandler(authorize(['VIEW_BOARD'], "workspace")),
-                       asyncHandler(boardController.getBoards));
+  boardRouter.get('/', asyncHandler(authenticate()), asyncHandler(authorize(['VIEW_BOARD'], "workspace")),
+    asyncHandler(boardController.getBoards));
   boardRouter.get('/:boardId', asyncHandler(authenticate()), asyncHandler(authorize(['VIEW_BOARD'], "board")),
-                       asyncHandler(boardController.getBoardById));
+    asyncHandler(boardController.getBoardById));
   boardRouter.post('/', asyncHandler(authenticate()), asyncHandler(authorize(['CREATE_BOARD'], "workspace")),
-                       asyncHandler(boardController.createBoard));
+    asyncHandler(boardController.createBoard));
   boardRouter.put('/:boardId', asyncHandler(authenticate()), asyncHandler(authorize(['UPDATE_BOARD'], "board")),
-                       asyncHandler(boardController.updateBoard));
+    asyncHandler(boardController.updateBoard));
   boardRouter.delete('/:boardId', asyncHandler(authenticate()), asyncHandler(authorize(['DELETE_BOARD'], "board")),
-                       asyncHandler(boardController.deleteBoard));
+    asyncHandler(boardController.deleteBoard));
 
-  boardRouter.use("/:boardId/board-join-link", boardJoinLinkRouter);  
+  boardRouter.use("/:boardId/board-join-link", boardJoinLinkRouter);
   boardRouter.use("/:boardId/member-board", memberBoardRouter);
-  boardRouter.use("/:boardId/list", listRouter);
   boardRouter.use("/:boardId/label", boardLabelRouter);
-  boardRouter.use("/:boardId/card", cardLabelRouter);
 
   return boardRouter;
 }
